@@ -319,21 +319,36 @@ window.SLIDES = {};
   }
 
   // ------------------------------------------------------------ intro: rotating 3D noise space, narrated
-  // Each point is one training demonstration's first action chunk mapped back through the flow to its noise
-  // (Isaac Lab, seed 0), shown in 3D PCA. The narration dims the cloud; at the end it morphs, point by point, from the
-  // Vanilla CFM noise space to the LoLip one (aligned by rotation only).
+  // The 299 real points are demonstrations' first action chunks mapped back through the flow to their noise (Isaac
+  // Lab, seed 0, train + held-out), in 3D PCA. For density each one gets DENSE - 1 companions jittered around it
+  // (illustration only), which follow it through the morph from the Vanilla CFM noise space to the LoLip one.
+  // The narration dims the cloud; it un-dims to show the noise space at the marked moments.
   const NARRATION = [
     [2.4, "We want to finetune this flow policy <b>without touching its weights</b>, by learning in its noise space."],
-    [7.2, "But this is difficult: the noises of different tasks are intermixed."],
-    [11.4, "What if there was a way to make this noise space easier to learn?"],
-    [15.4, "Introducing <b>LoLip</b>, a regularizer that creates smoother latent spaces."],
-    [19.6, null],
+    [7.0, "But this noise space is difficult to learn: the noises of different tasks are intermixed."],
+    [10.4, null],
+    [13.2, "What if there was a way to make this noise space easier to learn?"],
+    [17.2, "Introducing <b>LoLip</b>, a regularizer that creates smoother latent spaces."],
+    [21.2, null],
+    [27.4, "This noise space is easier to learn."],
+    [30.6, '<a href="#setting" class="narr-go">Scroll right to learn how →</a>'],
   ];
-  const MORPH = [20.0, 23.2];
+  const DIM = [[2.2, 10.4], [12.9, 21.2], [27.2, 1e9]];   // dimmed while the narration is on screen
+  const MORPH = [21.8, 25.0];
+  const DENSE = 4;
   function cloud3D(cv, data, narr) {
-    const ctx = cv.getContext("2d"), N = data.task.length, p = narr.querySelector("p");
-    const V = data.vanilla3, L = data.lolip3;
-    const order = d3.range(N).map((i) => ((Math.sin(i * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1);
+    const ctx = cv.getContext("2d"), p = narr.querySelector("p");
+    const hash = (i) => ((Math.sin(i * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1;
+    const gauss = (i) => Math.sqrt(-2 * Math.log(hash(i) * 0.999 + 0.001)) * Math.cos(2 * Math.PI * hash(i + 7919));
+    const V = [], L = [], task = [], order = [];
+    data.task3.forEach((t, i) => {
+      for (let k = 0; k < DENSE; k++) {
+        const j = i * DENSE + k, s = k ? 0.07 : 0, o = [0, 1, 2].map((d) => s * gauss(j * 3 + d + 11));
+        V.push(data.vanilla3[i].map((v, d) => v + o[d])); L.push(data.lolip3[i].map((v, d) => v + o[d]));
+        task.push(t); order.push(hash(i));
+      }
+    });
+    const N = task.length;
     let W, H, raf = null, t0 = null, shown = -1;
     const sstep = (t, a, b) => { const x = clamp((t - a) / (b - a)); return x * x * (3 - 2 * x); };
     function size() {
@@ -354,9 +369,9 @@ window.SLIDES = {};
     function frame(now) {
       t0 ??= now;
       if (!W) { if (!window.SHOT) raf = requestAnimationFrame(frame); return; }
-      const e = window.SHOT ? 30 : (now - t0) / 1000, rot = now / 1000 * 0.32, tilt = 0.42;
+      const e = window.SHOT ? 26 : (now - t0) / 1000, rot = now / 1000 * 0.32, tilt = 0.42;
       narrate(e);
-      const dim = sstep(e, 2.0, 2.8) * (1 - sstep(e, 19.2, 20.0));
+      const dim = Math.max(...DIM.map(([a, b]) => sstep(e, a, a + 0.7) * (1 - sstep(e, b, b + 0.6))));
       const m = sstep(e, MORPH[0], MORPH[1]);
       const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.34;
       ctx.clearRect(0, 0, W, H);
@@ -377,8 +392,8 @@ window.SLIDES = {};
       for (const [X, Y, z, persp, i] of pts) {
         const depth = clamp((1.4 - z) / 2.8);
         ctx.globalAlpha = (1 - 0.78 * dim) * (0.3 + 0.65 * depth);
-        ctx.fillStyle = data.task[i] === "mug" ? C.mug : C.bowl;
-        ctx.beginPath(); ctx.arc(X, Y, 3.4 * persp, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = task[i] === "mug" ? C.mug : C.bowl;
+        ctx.beginPath(); ctx.arc(X, Y, 2.6 * persp, 0, 2 * Math.PI); ctx.fill();
       }
       ctx.restore();
       if (!window.SHOT) raf = requestAnimationFrame(frame);

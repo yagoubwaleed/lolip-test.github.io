@@ -70,6 +70,7 @@
   prev.addEventListener("click", () => go(cur - 1));
   next.addEventListener("click", () => go(cur + 1));
   document.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); go(+a.dataset.go); }));
+  document.addEventListener("click", (e) => { const a = e.target.closest(".narr-go"); if (a) { e.preventDefault(); go(cur + 1); } });
   document.addEventListener("keydown", (e) => {
     if (e.target.closest("input, textarea")) return;
     if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
