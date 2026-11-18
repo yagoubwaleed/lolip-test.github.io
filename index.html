@@ -83,8 +83,8 @@
   <section class="slide tpl" style="--ar:4.35" id="contraction" data-title="Problem 1">
     <header class="tpl-head">
       <h2 data-a style="--d:1">Problem 1: Forward flows are <b>highly contractive</b>.</h2>
-        <p class="lede" data-a style="--d:2">We observe that the forward flow process is highly contractive: noises far apart in the latent space map to similar actions. This is bad for RL exploration, because it narrows the set of actions the policy can execute by exploring in noise space.</p>
-        <p class="lede" data-a style="--d:3">In the animation, we pick 8 noises far apart in the latent space and run the standard flow policy (Vanilla CFM) from each. The 8 resulting actions are nearly identical, and so are the 8 robot motions.</p>
+        <p class="lede" data-a style="--d:2">We observe that the forward flow is highly contractive: noises that are far apart in the latent space map to similar actions. This hurts RL exploration, since exploring in noise space can only reach a narrow set of actions.</p>
+        <p class="lede" data-a style="--d:3">In the animation, we pick 8 noises that are far apart in the latent space and run the standard flow policy (Vanilla CFM) from each. The 8 resulting actions are nearly identical, and so are the robot's motions.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-label="Action spread">
@@ -106,8 +106,8 @@
   <section class="slide tpl" style="--ar:4.35" id="expansion" data-title="Problem 2">
     <header class="tpl-head">
       <h2 data-a style="--d:1">Problem 2: The reverse process is <b>expansive</b>.</h2>
-        <p class="lede" data-a style="--d:2">To steer the policy from demonstrations (DSBC), each demonstrated action is mapped back through the flow to the noise that produces it, and a noise policy is fit to those noises. For Vanilla CFM, the Pick Mug and Pick Bowl noises are mixed together although their actions are clearly separated.</p>
-        <p class="lede" data-a style="--d:3">Asked to pick the mug, the noise policy samples from a region that also holds bowl noises, and here it selects one: the robot reaches for the bowl.</p>
+        <p class="lede" data-a style="--d:2">Forward contraction goes hand in hand with reverse expansion: mapping actions back to noise stretches them apart. As a result, the latent space intermixes the modes of the action space, which makes learning in the latent space more difficult.</p>
+        <p class="lede" data-a style="--d:3">We show both how this appears in the noise and action spaces when a noise policy is learned from demonstrations (DSBC), and an explicit measure: the singular values of the reverse map, which show the high expansion.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-label="Noise policy">
