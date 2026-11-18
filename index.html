@@ -8,10 +8,10 @@
 <link rel="icon" href="favicon-48.png" sizes="48x48" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="Lipschitz-Regularized Pretraining for Efficient Downstream Finetuning">
-<script>/* theme before first paint: stored choice, else the system setting */
+<script>/* theme before first paint: stored choice, else light */
 (() => { let t = null; try { t = localStorage.getItem("theme"); } catch (e) {}
   if (/[?&]theme=(light|dark)/.test(location.search)) t = RegExp.$1;
-  if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  if (t !== "light" && t !== "dark") t = "light";
   document.documentElement.dataset.theme = t; })();</script>
 <link rel="preload" href="fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
