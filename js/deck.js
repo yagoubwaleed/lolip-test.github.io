@@ -15,7 +15,6 @@
   let cur = -1, lock = false;
   const inited = new Set();
 
-  document.getElementById("countAll").textContent = pad(slides.length);
   const buttons = slides.map((s, i) => {
     const li = document.createElement("li");
     li.innerHTML = `<button><span class="n">${pad(i + 1)}</span>${s.dataset.title}</button>`;
@@ -46,7 +45,6 @@
     s.scrollTop = 0;
     buttons.forEach((b, k) => b.setAttribute("aria-current", k === i));
     placePill();
-    document.getElementById("countNow").textContent = pad(i + 1);
     prev.disabled = i === 0;
     next.disabled = i === slides.length - 1;
     if (i > 0) { next.classList.remove("pulse"); document.getElementById("hint").style.opacity = 0; }
@@ -61,6 +59,13 @@
     }
   }
   window.goSlide = go;
+
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem("theme", t); } catch (e) {}
+    dispatchEvent(new Event("themechange"));
+  });
 
   prev.addEventListener("click", () => go(cur - 1));
   next.addEventListener("click", () => go(cur + 1));

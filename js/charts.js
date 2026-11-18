@@ -2,8 +2,10 @@
 // entrance animation each time its slide opens.
 window.SLIDES = {};
 (() => {
-  const C = { ink: "#0e0e10", muted: "#74747a", pink: "#d91e5b", pinkFill: "#e35886", b1: "#e4569c", orange: "#e48a56",
-              grey: "#a6a6aa", greyLine: "#5f5f5f", greyFill: "#e4e4e6", hair: "#e8e6e3", mug: "#d91e5b", bowl: "#e48a56" };
+  // colours are CSS tokens (css/site.css), set as inline styles so the charts follow light / dark mode
+  const C = { ink: "var(--ink)", muted: "var(--muted)", pink: "var(--pink)", pinkFill: "#e35886", b1: "#e4569c", orange: "#e48a56",
+              grey: "#a6a6aa", greyLine: "var(--grey-line)", greyFill: "var(--bar-grey)", hair: "var(--hair)", mug: "#d91e5b", bowl: "#e48a56" };
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const cache = {};
   const load = (n) => (cache[n] ??= fetch(`data/${n}.json`).then((r) => r.json()));
   const ns = "http://www.w3.org/2000/svg";
@@ -38,15 +40,15 @@ window.SLIDES = {};
   function hatch(svg, id, color) {
     const p = svg.append("defs").append("pattern").attr("id", id).attr("patternUnits", "userSpaceOnUse")
       .attr("width", 6).attr("height", 6).attr("patternTransform", "rotate(45)");
-    p.append("rect").attr("width", 6).attr("height", 6).attr("fill", C.greyFill);
-    p.append("line").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 6).attr("stroke", color).attr("stroke-width", 1.1).attr("opacity", .55);
+    p.append("rect").attr("width", 6).attr("height", 6).style("fill", C.greyFill);
+    p.append("line").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 6).style("stroke", color).attr("stroke-width", 1.1).attr("opacity", .55);
   }
 
   function decadeTicks(g, x, lo, hi, y) {
     for (let k = Math.round(Math.log10(lo)); k <= Math.round(Math.log10(hi)); k++) {
       if (k % 2) continue;
       const t = g.append("text").attr("x", x(10 ** k)).attr("y", y).attr("text-anchor", "middle").attr("class", "mono")
-        .attr("fill", "#8b8b91").attr("font-size", 12.5);
+        .style("fill", "var(--tick)").attr("font-size", 12.5);
       t.append("tspan").text("10");
       t.append("tspan").attr("dy", -6).attr("font-size", 9).text(k);
     }
@@ -59,12 +61,12 @@ window.SLIDES = {};
     const x = d3.scaleLog().domain([lo, hi]).range([m.l, W - m.r]);
     const y = d3.scaleLinear().domain([0, ymax]).range([H - m.b, m.t]);
     const base = H - m.b;
-    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", base).attr("y2", base).attr("stroke", "#d9d7d3");
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", base).attr("y2", base).style("stroke", "var(--axis)");
     decadeTicks(svg, x, lo, hi, base + 24);
     svg.append("text").attr("x", (m.l + W - m.r) / 2).attr("y", H - 10).attr("text-anchor", "middle").attr("class", "axis-label").text(xLabel);
     const refG = svg.append("g");
-    refG.append("line").attr("x1", x(ref)).attr("x2", x(ref)).attr("y1", m.t - 14).attr("y2", base).attr("stroke", C.ink).attr("stroke-width", 1.1).attr("stroke-dasharray", "4 4").attr("opacity", .55);
-    refG.append("text").attr("x", x(ref) + 8).attr("y", m.t - 4).attr("font-size", 13).attr("fill", C.muted).text(refLabel);
+    refG.append("line").attr("x1", x(ref)).attr("x2", x(ref)).attr("y1", m.t - 14).attr("y2", base).style("stroke", C.ink).attr("stroke-width", 1.1).attr("stroke-dasharray", "4 4").attr("opacity", .55);
+    refG.append("text").attr("x", x(ref) + 8).attr("y", m.t - 4).attr("font-size", 13).style("fill", C.muted).text(refLabel);
     const floorG = svg.append("g").attr("opacity", 0);
     const areas = svg.append("g");
     const labels = svg.append("g");
@@ -82,10 +84,10 @@ window.SLIDES = {};
     }
     function draw(k = 1) {
       const sel = areas.selectAll("path").data(series, (s) => s.key);
-      sel.join("path").attr("d", (s) => path(s.share, k)).attr("fill", (s) => s.color).attr("fill-opacity", (s) => s.opacity ?? 1);
+      sel.join("path").attr("d", (s) => path(s.share, k)).style("fill", (s) => s.color).attr("fill-opacity", (s) => s.opacity ?? 1);
       const lab = labels.selectAll("text").data(series.filter((s) => s.label), (s) => s.key);
       lab.join("text").attr("font-size", 15).attr("font-weight", (s) => s.bold ? 600 : 450)
-        .attr("fill", (s) => s.labelColor ?? s.color).attr("text-anchor", "middle")
+        .style("fill", (s) => s.labelColor ?? s.color).attr("text-anchor", "middle")
         .attr("opacity", ease(clamp(k * 2 - 1)))
         .each(function (s) {
           const j = d3.maxIndex(s.share);
@@ -95,15 +97,15 @@ window.SLIDES = {};
     }
     function setFloor(v, label, op) {
       floorG.selectAll("*").remove();
-      floorG.append("line").attr("x1", x(v)).attr("x2", x(v)).attr("y1", m.t - 14).attr("y2", base).attr("stroke", C.pink).attr("stroke-width", 1.6).attr("stroke-dasharray", "5 4");
-      floorG.append("text").attr("x", x(v) - 8).attr("text-anchor", "end").attr("y", m.t + 12).attr("font-size", 13).attr("fill", C.pink).attr("font-weight", 600).text(label);
+      floorG.append("line").attr("x1", x(v)).attr("x2", x(v)).attr("y1", m.t - 14).attr("y2", base).style("stroke", C.pink).attr("stroke-width", 1.6).attr("stroke-dasharray", "5 4");
+      floorG.append("text").attr("x", x(v) - 8).attr("text-anchor", "end").attr("y", m.t + 12).attr("font-size", 13).style("fill", C.pink).attr("font-weight", 600).text(label);
       floorG.attr("opacity", op);
     }
 
     // hover readout
     const hov = svg.append("g").attr("pointer-events", "none").attr("opacity", 0);
-    hov.append("line").attr("y1", m.t - 14).attr("y2", base).attr("stroke", C.ink).attr("stroke-width", 1);
-    svg.append("rect").attr("x", m.l).attr("y", m.t - 14).attr("width", W - m.l - m.r).attr("height", base - m.t + 14).attr("fill", "transparent")
+    hov.append("line").attr("y1", m.t - 14).attr("y2", base).style("stroke", C.ink).attr("stroke-width", 1);
+    svg.append("rect").attr("x", m.l).attr("y", m.t - 14).attr("width", W - m.l - m.r).attr("height", base - m.t + 14).style("fill", "transparent")
       .on("pointermove", (e) => {
         const [px] = d3.pointer(e);
         const v = x.invert(px);
@@ -127,78 +129,6 @@ window.SLIDES = {};
     };
   }
 
-  // ------------------------------------------------------------ noise space -> action space scatter
-  function latentChart(el, data, { arm = "vanilla" } = {}) {
-    const W = 660, H = 380, R = 150, RA = 118, cyy = 190, cxN = 175, cxA = 510;
-    const svg = svgEl(el, W, H);
-    const N = data.task.length;
-    const pos = (arm) => data[arm].map(([a, b]) => [cxN + a * R, cyy - b * R]);
-    const act = data.action.map(([a, b]) => [cxA + a * RA, cyy - b * RA]);
-    let P = pos(arm);
-    svg.append("circle").attr("cx", cxN).attr("cy", cyy).attr("r", R).attr("fill", "#fbfbfa").attr("stroke", C.hair).attr("stroke-width", 1.2);
-    svg.append("circle").attr("cx", cxA).attr("cy", cyy).attr("r", RA).attr("fill", "#fbfbfa").attr("stroke", C.hair).attr("stroke-width", 1.2);
-    const lab = (x0, t) => svg.append("text").attr("x", x0).attr("y", H - 2).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 11.5).attr("fill", C.muted).attr("letter-spacing", ".08em").text(t);
-    lab(cxN, "NOISE SPACE"); lab(cxA, "ACTION SPACE");
-    const col = (i) => (data.task[i] === "mug" ? C.mug : C.bowl);
-    const curve = (p, q) => `M${p[0]},${p[1]}C${p[0] + 150},${p[1]} ${q[0] - 150},${q[1]} ${q[0]},${q[1]}`;
-    const links = svg.append("g").attr("fill", "none");
-    const L = links.selectAll("path").data(d3.range(N)).join("path").attr("stroke", col).attr("stroke-width", .8).attr("opacity", .07).attr("d", (i) => curve(P[i], act[i]));
-    const aDots = svg.append("g").selectAll("circle").data(d3.range(N)).join("circle").attr("cx", (i) => act[i][0]).attr("cy", (i) => act[i][1]).attr("r", 3.4).attr("fill", col).attr("fill-opacity", .7);
-    const nDots = svg.append("g").selectAll("circle").data(d3.range(N)).join("circle").attr("cx", (i) => P[i][0]).attr("cy", (i) => P[i][1]).attr("r", 4).attr("fill", col).attr("fill-opacity", .75).attr("stroke", "#fff").attr("stroke-width", .8);
-    // task labels in action space
-    for (const [t, name] of [["mug", "Pick Mug"], ["bowl", "Pick Bowl"]]) {
-      const idx = d3.range(N).filter((i) => data.task[i] === t);
-      const my = d3.mean(idx, (i) => act[i][1]);
-      svg.append("text").attr("x", cxA).attr("y", my + (t === "mug" ? -RA * 0.62 : RA * 0.68)).attr("text-anchor", "middle").attr("font-size", 14).attr("font-weight", 550).attr("fill", t === "mug" ? C.mug : C.bowl)
-        .attr("class", "tasklab").datum(t).style("cursor", "pointer").text(name)
-        .on("pointerenter", () => focusTask(t)).on("pointerleave", () => focusTask(null));
-    }
-    function focusTask(t) {
-      nDots.attr("fill-opacity", (i) => (!t || data.task[i] === t ? .85 : .08));
-      aDots.attr("fill-opacity", (i) => (!t || data.task[i] === t ? .8 : .08));
-      L.attr("opacity", (i) => (!t ? .07 : data.task[i] === t ? .16 : 0));
-    }
-    const hl = svg.append("path").attr("fill", "none").attr("stroke-width", 2.2).attr("opacity", 0).attr("pointer-events", "none");
-    nDots.style("cursor", "pointer")
-      .on("pointerenter", (e, i) => {
-        hl.attr("d", curve(P[i], act[i])).attr("stroke", col(i)).attr("opacity", .9);
-        nDots.filter((j) => j === i).attr("r", 7);
-        aDots.filter((j) => j === i).attr("r", 7).attr("fill-opacity", 1);
-        showTip(e, `<i style="background:${col(i)}"></i>${data.task[i] === "mug" ? "Pick Mug" : "Pick Bowl"} demo <span class="mono">#${i}</span>`);
-      })
-      .on("pointerleave", (e, i) => { hl.attr("opacity", 0); nDots.attr("r", 4); aDots.attr("r", 3.4).attr("fill-opacity", .7); hideTip(); });
-
-    let cancel = () => {};
-    function place(k, from, to) {
-      const Q = d3.range(N).map((i) => {
-        const f = ease(clamp(k * 1.6 - (i / N) * 0.6));
-        return [from[i][0] + (to[i][0] - from[i][0]) * f, from[i][1] + (to[i][1] - from[i][1]) * f];
-      });
-      nDots.attr("cx", (i) => Q[i][0]).attr("cy", (i) => Q[i][1]);
-      L.attr("d", (i) => curve(Q[i], act[i]));
-      return Q;
-    }
-    return {
-      play() {
-        cancel();
-        const center = d3.range(N).map(() => [cxN, cyy]);
-        aDots.attr("r", 0);
-        L.attr("opacity", 0);
-        cancel = tween(1300, (k) => {
-          place(k, center, P);
-          aDots.attr("r", (i) => 3.4 * ease(clamp(k * 1.6 - (i / N) * 0.6)));
-          L.attr("opacity", .07 * ease(clamp(k * 2 - 1)));
-        });
-      },
-      to(arm2) {
-        cancel();
-        const from = P.map((p) => p.slice()), to = pos(arm2);
-        P = to;
-        cancel = tween(1200, (k) => place(k, from, to));
-      },
-    };
-  }
-
   // ------------------------------------------------------------ grouped bars, Vanilla vs LoLip
   function barChart(el, { groups, yMax = 1, yTicks, fmt = pct, H = 380, labels = false, ratio = false, rotate = false, sepBeforeLast = false }) {
     const W = 680, m = { l: 46, r: 8, t: 26, b: rotate ? 92 : 48 };
@@ -208,27 +138,27 @@ window.SLIDES = {};
     const y = d3.scaleLinear().domain([0, yMax]).range([H - m.b, m.t]);
     const g = svg.append("g");
     for (const t of yTicks) {
-      g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).attr("stroke", t === 0 ? "#d9d7d3" : "#efedea");
-      g.append("text").attr("x", m.l - 10).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 11.5).attr("fill", "#8b8b91").text(fmt(t));
+      g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t === 0 ? "var(--axis)" : "var(--gridline)");
+      g.append("text").attr("x", m.l - 10).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 11.5).style("fill", "var(--tick)").text(fmt(t));
     }
     if (sepBeforeLast) {
       const xs = x(groups.at(-1).name) - x.step() * x.paddingInner() / 2;
-      g.append("line").attr("x1", xs).attr("x2", xs).attr("y1", m.t - 10).attr("y2", H - m.b).attr("stroke", "#d9d7d3");
+      g.append("line").attr("x1", xs).attr("x2", xs).attr("y1", m.t - 10).attr("y2", H - m.b).style("stroke", "var(--axis)");
     }
     const bw = x.bandwidth() / 2;
     const items = groups.flatMap((gr, gi) => ["vanilla", "lolip"].map((k, j) => ({ gr, gi, k, j, v: gr[k].mean, sd: gr[k].sd })));
     const bars = svg.append("g").selectAll("g").data(items).join("g");
     const rects = bars.append("rect").attr("x", (d) => x(d.gr.name) + d.j * bw + 1.5).attr("width", bw - 3).attr("rx", 3)
-      .attr("fill", (d) => (d.k === "lolip" ? C.pinkFill : `url(#h${el.id})`)).attr("stroke", (d) => (d.k === "lolip" ? C.pink : "#8a8a8e")).attr("stroke-width", 1.5)
+      .style("fill", (d) => (d.k === "lolip" ? C.pinkFill : `url(#h${el.id})`)).style("stroke", (d) => (d.k === "lolip" ? C.pink : "var(--bar-edge)")).attr("stroke-width", 1.5)
       .attr("y", y(0)).attr("height", 0);
-    const errs = bars.filter((d) => d.sd != null).append("path").attr("stroke", C.ink).attr("stroke-width", 1.1).attr("fill", "none").attr("opacity", 0)
+    const errs = bars.filter((d) => d.sd != null).append("path").style("stroke", C.ink).attr("stroke-width", 1.1).style("fill", "none").attr("opacity", 0)
       .attr("d", (d) => { const cx = x(d.gr.name) + d.j * bw + bw / 2, a = y(clamp(d.v - d.sd, 0, yMax)), b = y(Math.min(d.v + d.sd, yMax)); return `M${cx},${a}V${b}M${cx - 4},${a}H${cx + 4}M${cx - 4},${b}H${cx + 4}`; });
     const vals = labels ? bars.append("text").attr("x", (d) => x(d.gr.name) + d.j * bw + bw / 2).attr("text-anchor", "middle").attr("font-size", 14).attr("font-weight", (d) => (d.k === "lolip" ? 600 : 450))
-      .attr("fill", (d) => (d.k === "lolip" ? C.pink : C.greyLine)).attr("opacity", 0) : null;
+      .style("fill", (d) => (d.k === "lolip" ? C.pink : C.greyLine)).attr("opacity", 0) : null;
     const ratios = ratio ? svg.append("g").selectAll("text").data(groups).join("text").attr("x", (d) => x(d.name) + x.bandwidth() / 2).attr("y", (d) => y(Math.max(d.vanilla.mean, d.lolip.mean)) - 14)
-      .attr("text-anchor", "middle").attr("font-size", 15).attr("font-weight", 600).attr("fill", C.pink).attr("opacity", 0).text((d) => `×${(d.lolip.mean / d.vanilla.mean).toFixed(2)}`) : null;
+      .attr("text-anchor", "middle").attr("font-size", 15).attr("font-weight", 600).style("fill", C.pink).attr("opacity", 0).text((d) => `×${(d.lolip.mean / d.vanilla.mean).toFixed(2)}`) : null;
     // x labels
-    const xl = svg.append("g").selectAll("text").data(groups).join("text").attr("font-size", rotate ? 12 : 13.5).attr("fill", C.ink)
+    const xl = svg.append("g").selectAll("text").data(groups).join("text").attr("font-size", rotate ? 12 : 13.5).style("fill", C.ink)
       .attr("font-weight", (d) => (d.mean ? 600 : 400));
     if (rotate) xl.attr("text-anchor", "end").attr("transform", (d) => `translate(${x(d.name) + x.bandwidth() / 2 + 4},${H - m.b + 14}) rotate(-38)`).text((d) => d.name);
     else xl.attr("text-anchor", "middle").attr("x", (d) => x(d.name) + x.bandwidth() / 2).attr("y", H - m.b + 26).text((d) => d.name);
@@ -278,22 +208,22 @@ window.SLIDES = {};
       gs.push(g);
       g.append("text").attr("x", m.l).attr("y", 12).attr("font-size", 14).attr("font-weight", 550).text(p.name);
       for (const t of [0, .5, 1]) {
-        g.append("line").attr("x1", m.l).attr("x2", PW - m.r).attr("y1", ys(t)).attr("y2", ys(t)).attr("stroke", t ? "#efedea" : "#d9d7d3");
-        g.append("text").attr("x", m.l - 7).attr("y", ys(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 10.5).attr("fill", "#8b8b91").text(t * 100 + "%");
+        g.append("line").attr("x1", m.l).attr("x2", PW - m.r).attr("y1", ys(t)).attr("y2", ys(t)).style("stroke", t ? "var(--gridline)" : "var(--axis)");
+        g.append("text").attr("x", m.l - 7).attr("y", ys(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t * 100 + "%");
       }
-      for (const t of [0, 2e5, 4e5]) g.append("text").attr("x", xs(t)).attr("y", PH - 6).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 10.5).attr("fill", "#8b8b91").text(t ? `${t / 1e3}k` : "0");
+      for (const t of [0, 2e5, 4e5]) g.append("text").attr("x", xs(t)).attr("y", PH - 6).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t ? `${t / 1e3}k` : "0");
       const body = g.append("g").attr("clip-path", `url(#${id})`);
       for (const M of RL_METHODS) {
         const d = p[M.k];
         if (!d) continue;
         const idx = d3.range(steps.length).filter((i) => d.mean[i] != null);
-        body.append("path").attr("class", `m-${M.k}`).attr("fill", M.color).attr("opacity", M.k === "lolip" ? .14 : .06)
+        body.append("path").attr("class", `m-${M.k}`).style("fill", M.color).attr("opacity", M.k === "lolip" ? .14 : .06)
           .attr("d", d3.area().x((i) => xs(steps[i])).y0((i) => ys(d.lo[i])).y1((i) => ys(d.hi[i])).curve(d3.curveMonotoneX)(idx));
-        body.append("path").attr("class", `m-${M.k}`).attr("fill", "none").attr("stroke", M.color).attr("stroke-width", M.w).attr("stroke-dasharray", M.dash ?? null).attr("stroke-linejoin", "round")
+        body.append("path").attr("class", `m-${M.k}`).style("fill", "none").style("stroke", M.color).attr("stroke-width", M.w).attr("stroke-dasharray", M.dash ?? null).attr("stroke-linejoin", "round")
           .attr("d", d3.line().x((i) => xs(steps[i])).y((i) => ys(d.mean[i])).curve(d3.curveMonotoneX)(idx));
       }
-      const hl = g.append("line").attr("y1", m.t).attr("y2", PH - m.b).attr("stroke", C.ink).attr("opacity", 0).attr("pointer-events", "none");
-      g.append("rect").attr("x", m.l).attr("y", m.t).attr("width", PW - m.l - m.r).attr("height", PH - m.t - m.b).attr("fill", "transparent")
+      const hl = g.append("line").attr("y1", m.t).attr("y2", PH - m.b).style("stroke", C.ink).attr("opacity", 0).attr("pointer-events", "none");
+      g.append("rect").attr("x", m.l).attr("y", m.t).attr("width", PW - m.l - m.r).attr("height", PH - m.t - m.b).style("fill", "transparent")
         .on("pointermove", (e) => {
           const [px] = d3.pointer(e);
           const i = Math.round(clamp(xs.invert(px), 0, 5e5) / 1e4);
@@ -306,10 +236,10 @@ window.SLIDES = {};
     });
     svg.append("text").attr("x", W / 2).attr("y", H - 2).attr("text-anchor", "middle").attr("class", "axis-label").text("Environment steps");
     if (legendEl) {
-      legendEl.innerHTML = RL_METHODS.slice().reverse().map((M) => `<span data-k="${M.k}"><svg width="22" height="8"><line x1="0" x2="22" y1="4" y2="4" stroke="${M.color}" stroke-width="${M.w + .4}" ${M.dash ? `stroke-dasharray="${M.dash}"` : ""}/></svg>${M.label}</span>`).join("");
+      legendEl.innerHTML = RL_METHODS.slice().reverse().map((M) => `<span data-k="${M.k}"><svg width="22" height="8"><line x1="0" x2="22" y1="4" y2="4" style="stroke:${M.color}" stroke-width="${M.w + .4}" ${M.dash ? `stroke-dasharray="${M.dash}"` : ""}/></svg>${M.label}</span>`).join("");
       legendEl.querySelectorAll("span").forEach((s) => {
         s.onpointerenter = () => svg.selectAll("path[class^=m-]").attr("opacity", function () { return this.classList.contains(`m-${s.dataset.k}`) ? null : .06; });
-        s.onpointerleave = () => svg.selectAll("path[class^=m-]").attr("opacity", function () { return this.getAttribute("fill") !== "none" ? (this.classList.contains("m-lolip") ? .14 : .06) : null; });
+        s.onpointerleave = () => svg.selectAll("path[class^=m-]").attr("opacity", function () { return this.style.fill !== "none" ? (this.classList.contains("m-lolip") ? .14 : .06) : null; });
       });
     }
     let cancel = () => {};
@@ -324,9 +254,9 @@ window.SLIDES = {};
     const mx = d3.max(ys);
     const pts = xs.map((x, k) => [cx + (x * GW) / 2, b - (ys[k] / mx) * GH]);
     const line = pts.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
-    return `<g style="--i:${i}"><polygon class="d-in" style="--i:${i}" points="${pts[0][0]},${b} ${line} ${pts.at(-1)[0]},${b}" fill="${col}" fill-opacity=".16"/>` +
-      `<polyline class="d-draw" style="--i:${i}" pathLength="1" points="${line}" fill="none" stroke="${col}" stroke-width="3.2" stroke-linejoin="round"/>` +
-      `<line class="d-in" style="--i:${i}" x1="${cx - GW / 2 - 6}" y1="${b}" x2="${cx + GW / 2 + 6}" y2="${b}" stroke="${C.ink}" stroke-width="2"/></g>`;
+    return `<g style="--i:${i}"><polygon class="d-in" style="--i:${i};fill:${col}" points="${pts[0][0]},${b} ${line} ${pts.at(-1)[0]},${b}" fill-opacity=".16"/>` +
+      `<polyline class="d-draw" style="--i:${i};fill:none;stroke:${col}" pathLength="1" points="${line}" stroke-width="3.2" stroke-linejoin="round"/>` +
+      `<line class="d-in" style="--i:${i};stroke:${C.ink}" x1="${cx - GW / 2 - 6}" y1="${b}" x2="${cx + GW / 2 + 6}" y2="${b}" stroke-width="2"/></g>`;
   }
   function arrowD(pts, col = C.ink, i = 0, dash = false) {
     const [a, b] = [pts.at(-2), pts.at(-1)];
@@ -337,21 +267,21 @@ window.SLIDES = {};
     const line = [...pts.slice(0, -1), [bx, by]].map((p) => p.join(",")).join(" ");
     const head = `${b[0]},${b[1]} ${bx + nx * 6},${by + ny * 6} ${bx - nx * 6},${by - ny * 6}`;
     return dash
-      ? `<polyline class="d-in" style="--i:${i}" points="${line}" fill="none" stroke="${col}" stroke-width="2.2" stroke-dasharray="7 6"/><polygon class="d-in" style="--i:${i}" points="${head}" fill="${col}"/>`
-      : `<polyline class="d-draw" style="--i:${i}" pathLength="1" points="${line}" fill="none" stroke="${col}" stroke-width="2.2"/><polygon class="d-in" style="--i:${i}" points="${head}" fill="${col}"/>`;
+      ? `<polyline class="d-in" style="--i:${i};fill:none;stroke:${col}" points="${line}" stroke-width="2.2" stroke-dasharray="7 6"/><polygon class="d-in" style="--i:${i};fill:${col}" points="${head}"/>`
+      : `<polyline class="d-draw" style="--i:${i};fill:none;stroke:${col}" pathLength="1" points="${line}" stroke-width="2.2"/><polygon class="d-in" style="--i:${i};fill:${col}" points="${head}"/>`;
   }
   const it = (s) => `<tspan font-style="italic">${s}</tspan>`;
   const SUB = (s) => `<tspan baseline-shift="sub" font-size=".68em">${s}</tspan>`;
   const SUP = (s) => `<tspan dx="2" baseline-shift="super" font-size=".62em">${s}</tspan>`;
   function box(x0, x1, y, BH, name, pink, i) {
-    return `<g class="d-in" style="--i:${i}"><rect x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" fill="${pink ? "#f2d7e1" : "#f2f2f2"}" stroke="${pink ? "#c5426c" : C.ink}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${name}</text></g>`;
+    return `<g class="d-in" style="--i:${i}"><rect x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${pink ? "var(--box-pink)" : "var(--box)"};stroke:${pink ? "var(--box-pink-edge)" : C.ink}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${name}</text></g>`;
   }
   function dsbcSVG() {
     const BX0 = 50, BX1 = 290, GX = 400, Y0 = 36, P = 100, BH = 54, GW = 130, W = 520, H = Y0 + 4 * P + 36, cx = (BX0 + BX1) / 2;
-    const st = [["Demos", it("a") + SUB(it("D")), [[0.42, -0.45, 0.17], [1.0, 0.18, 0.2]], "#4f4f4f"],
-                ["Invert flow " + it("f") + SUP("−1"), it("w") + SUB(it("D")), [[1, 0, 0.3]], "#c5426c"],
-                ["Noise policy " + it("π") + SUB(it("θ")), it("w′"), [[1, 0, 0.12]], "#c5426c"],
-                ["Flow forward " + it("f"), it("a"), [[0.2, -0.3, 0.08], [1.0, 0.18, 0.11]], "#4f4f4f"],
+    const st = [["Demos", it("a") + SUB(it("D")), [[0.42, -0.45, 0.17], [1.0, 0.18, 0.2]], "var(--grey-line)"],
+                ["Invert flow " + it("f") + SUP("−1"), it("w") + SUB(it("D")), [[1, 0, 0.3]], "var(--box-pink-edge)"],
+                ["Noise policy " + it("π") + SUB(it("θ")), it("w′"), [[1, 0, 0.12]], "var(--box-pink-edge)"],
+                ["Flow forward " + it("f"), it("a"), [[0.2, -0.3, 0.08], [1.0, 0.18, 0.11]], "var(--grey-line)"],
                 ["Environment", it("s′"), null, null]];
     let p = "";
     st.forEach(([name, out, comps, col], k) => {
@@ -368,10 +298,10 @@ window.SLIDES = {};
   }
   function dsrlSVG() {
     const BX0 = 70, BX1 = 300, GX = 410, YS = [96, 206, 316], BH = 54, GW = 130, LX = 26, LY = 404, W = 520, H = 424, cx = (BX0 + BX1) / 2;
-    const st = [["Noise policy " + it("π") + SUP(it("W")), it("w"), [[1, 0, 0.12]], "#c5426c"],
-                ["Flow policy " + it("π") + SUB("dp"), it("a"), [[0.45, -0.4, 0.13], [1.0, 0.25, 0.15]], "#4f4f4f"],
+    const st = [["Noise policy " + it("π") + SUP(it("W")), it("w"), [[1, 0, 0.12]], "var(--box-pink-edge)"],
+                ["Flow policy " + it("π") + SUB("dp"), it("a"), [[0.45, -0.4, 0.13], [1.0, 0.25, 0.15]], "var(--grey-line)"],
                 ["Environment", it("s′"), null, null]];
-    let p = `<rect class="d-in" style="--i:3" x="${BX0 - 14}" y="${YS[1] - BH / 2 - 14}" width="${BX1 - BX0 + 28}" height="${YS[2] - YS[1] + BH + 50}" rx="14" fill="none" stroke="#b8b8b8" stroke-width="1.6"/>` +
+    let p = `<rect class="d-in" style="--i:3;fill:none;stroke:var(--frame)" x="${BX0 - 14}" y="${YS[1] - BH / 2 - 14}" width="${BX1 - BX0 + 28}" height="${YS[2] - YS[1] + BH + 50}" rx="14" stroke-width="1.6"/>` +
             `<text class="d-in" style="--i:3;font-size:19px;fill:${C.muted}" x="${cx}" y="${YS[2] + BH / 2 + 19}">Latent-action environment</text>`;
     p += `<text class="d-in" style="--i:0" x="${cx}" y="${YS[0] - BH / 2 - 52}">${it("s")}</text>` + arrowD([[cx, YS[0] - BH / 2 - 36], [cx, YS[0] - BH / 2 - 3]], C.ink, 0);
     st.forEach(([name, out, comps, col], k) => {
@@ -383,8 +313,8 @@ window.SLIDES = {};
                  : `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX - GW / 2 + 4}" y="${y}">${out}</text>`;
     });
     const sx = GX - GW / 2 + 16;
-    p += arrowD([[sx, YS[2] + 22], [sx, LY], [LX, LY], [LX, YS[0]], [BX0 - 3, YS[0]]], "#c5426c", 7, true) +
-         `<text class="d-in" style="--i:7;font-size:21px;fill:#c5426c;paint-order:stroke" stroke="#fff" stroke-width="10" x="${(sx + LX) / 2 + 60}" y="${LY}">RL training</text>`;
+    p += arrowD([[sx, YS[2] + 22], [sx, LY], [LX, LY], [LX, YS[0]], [BX0 - 3, YS[0]]], "var(--box-pink-edge)", 7, true) +
+         `<text class="d-in" style="--i:7;font-size:21px;fill:var(--box-pink-edge);paint-order:stroke;stroke:var(--bg)" stroke-width="10" x="${(sx + LX) / 2 + 60}" y="${LY}">RL training</text>`;
     return `<svg class="dg" viewBox="0 0 ${W} ${H}">${p}</svg>`;
   }
 
@@ -408,7 +338,8 @@ window.SLIDES = {};
     const col = (i, a) => (data.task[i] === "mug" ? `rgba(217,30,91,${a})` : `rgba(228,138,86,${a})`);
     function frame() {
       ctx.clearRect(0, 0, W, H);
-      for (const [x0, r] of [[cxN, R], [cxA, RA]]) { ctx.beginPath(); ctx.arc(x0, cy, r, 0, 7); ctx.fillStyle = "#fbfbfa"; ctx.fill(); ctx.strokeStyle = "#e8e6e3"; ctx.lineWidth = 1; ctx.stroke(); }
+      const disc = cssVar("--disc"), edge = cssVar("--hair");
+      for (const [x0, r] of [[cxN, R], [cxA, RA]]) { ctx.beginPath(); ctx.arc(x0, cy, r, 0, 7); ctx.fillStyle = disc; ctx.fill(); ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.stroke(); }
       for (let i = 0; i < N; i++) {
         const [a, b] = nP(i), [c, d] = aP(i);
         ctx.fillStyle = col(i, .32); ctx.beginPath(); ctx.arc(a, b, 2.4, 0, 7); ctx.fill();
@@ -465,40 +396,122 @@ window.SLIDES = {};
   const invReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(1 - s.below)}</span> of singular values are above <span class="mono">${d3.format(".1~e")(v)}</span><br>(a change in the action scaled up more than <span class="mono">${fmtX(v)}</span>)`).join("<br>");
   const fmtX = (v) => (v >= 1000 ? `${d3.format(",.0f")(v)}×` : v >= 10 ? `${v.toFixed(0)}×` : `${v.toFixed(1)}×`);
 
-  let hF;
+  // ------------------------------------------------------------ contraction scenes (js/scenes.js)
+  const SCENE = { spread: { vanilla: "3_4_action_spread_vanilla", lolip: "3_4_action_spread_lolip" },
+                  inference: { vanilla: "1_2_inference_vanilla", lolip: "1_2_inference_lolip" } };
+  // one scene object per policy, created on first use; only the current one is shown
+  function scenePool(host, kind) {
+    const objs = {};
+    return async (p) => {
+      if (!objs[p]) {
+        const el = document.createElement("div");
+        host.appendChild(el);
+        objs[p] = { el, sc: new (kind === "spread" ? Scenes.Spread : Scenes.Inference)(el, await Scenes.loadScene(SCENE[kind][p])) };
+      }
+      for (const k in objs) { objs[k].el.hidden = k !== p; if (k !== p) objs[k].sc.stop(); }
+      objs[p].sc.resize();
+      return objs[p].sc;
+    };
+  }
+  // action spread: plays on its own, with replay and an optional Vanilla / LoLip switch
+  function spreadWidget(hostId, initial) {
+    const host = document.getElementById(hostId), bar = host.parentElement.querySelector(".scene-bar");
+    const get = scenePool(host, "spread");
+    let p = initial, cur = null;
+    const run = async () => { cur = await get(p); cur.t = 0; cur.play(0, cur.end, cur.sc.clock.speedup); };
+    bar.querySelector("[data-replay]").addEventListener("click", run);
+    const ps = bar.querySelector("[data-policy]");
+    if (ps) seg(ps, (v) => { p = v; run(); });
+    return { run, stop: () => cur?.stop() };
+  }
+  // noise policy demo: (1) invert the demonstrations and fit the noise policy, (2) sample from it for "pick the mug"
+  function inferenceWidget(hostId, initial) {
+    const host = document.getElementById(hostId), bar = host.parentElement.querySelector(".scene-bar");
+    const bL = bar.querySelector("[data-learn]"), bI = bar.querySelector("[data-infer]"), st = bar.querySelector("[data-status]");
+    const get = scenePool(host, "inference");
+    let p = initial, cur = null, timers = [];
+    const later = (sec, fn) => timers.push(setTimeout(fn, (sec * 1000) / cur.sc.clock.speedup));
+    const clear = () => { timers.forEach(clearTimeout); timers = []; };
+    const reset = async () => {
+      clear(); cur?.stop();
+      cur = await get(p);
+      cur.showTarget = false; cur.t = 0; cur.draw(0);
+      bL.disabled = false; bI.disabled = true; bL.classList.add("solid"); bI.classList.remove("solid");
+      st.textContent = "";
+    };
+    const learn = (then) => {
+      clear(); bL.disabled = bI.disabled = true; cur.showTarget = false;
+      st.textContent = "Mapping 240 demonstrations back through the flow to their noises…";
+      later(2.6, () => (st.textContent = "Fitting a noise policy to the noises of the Pick Mug demonstrations…"));
+      cur.play(0, cur.T0 + 1.3, cur.sc.clock.speedup, () => {
+        st.textContent = "Noise policy learned: the dotted circle is where it samples for “pick the mug”.";
+        bL.disabled = false; bL.classList.remove("solid"); bI.disabled = false; bI.classList.add("solid");
+        then?.();
+      });
+    };
+    const infer = () => {
+      clear(); bL.disabled = bI.disabled = true; cur.showTarget = true;
+      const t0 = cur.T0 + 1.3, mug = cur.sc.noise_points[cur.sc.selected].task === "mugplace";
+      st.textContent = "Target: pick the mug. Sampling a noise from the noise policy…";
+      later(2.6 - 1.3 + 0.3, () => (st.textContent = `The sampled noise is a ${mug ? "Pick Mug" : "Pick Bowl"} noise. Rolling out…`));
+      cur.play(t0, cur.end, cur.sc.clock.speedup, () => {
+        st.textContent = mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.";
+        bL.disabled = false; bI.disabled = false;
+      });
+    };
+    bL.addEventListener("click", () => learn());
+    bI.addEventListener("click", infer);
+    const ps = bar.querySelector("[data-policy]");
+    if (ps) seg(ps, async (v) => { p = v; await reset(); });
+    return { reset, stop: () => { clear(); cur?.stop(); }, demo: () => learn(infer) };
+  }
+  const paneSwitch = (segId, panes, capEl, caps, onShow) => {
+    capEl.textContent = caps.scene;
+    seg(document.getElementById(segId), (v) => {
+      for (const k in panes) document.getElementById(panes[k]).hidden = k !== v;
+      capEl.textContent = caps[v];
+      onShow(v);
+    });
+  };
+
+  let wContr, hF, contrMode = "scene";
   SLIDES.contraction = {
     async init() {
+      wContr = spreadWidget("sceneSpreadV", "vanilla");
+      paneSwitch("segContr", { scene: "contrScenePane", hist: "contrHistPane" }, document.getElementById("contrCap"), {
+        scene: "Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk and the noise it maps back to through the flow · the 8 far-apart noises and the drawing scale are chosen for illustration · robot: the 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)",
+        hist: "Isaac Lab, Vanilla CFM · all 28 singular values of the Jacobian ∂a/∂z of the 100-step flow · 3 training seeds, 50,232 values · hover to read",
+      }, (v) => { contrMode = v; v === "scene" ? wContr.run() : (wContr.stop(), hF.play()); });
       const d = (await load("singular_values")).forward;
       hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
-      hF.set([{ key: "v", share: d.vanilla.share, color: "#b4b4b8", label: "Vanilla CFM", labelColor: C.ink }]);
+      hF.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
       document.getElementById("contrMed").textContent = d.vanilla.median.toFixed(4);
       document.getElementById("contrX").textContent = Math.round(1 / d.vanilla.median);
     },
-    async enter() { await load("singular_values"); hF.play(); },
+    async enter() { await load("singular_values"); contrMode === "scene" ? wContr.run() : hF.play(); },
+    leave() { wContr.stop(); },
   };
 
-  let expL, expH, expMode = "latent";
-  const expCaps = {
-    latent: "Isaac Lab, Vanilla CFM · each dot: one training demonstration's first action chunk, mapped back through the flow to its noise; both spaces shown in 2D (PCA) · hover a dot to see its action",
-    hist: "Isaac Lab, Vanilla CFM · singular values of the inverse map ∂z/∂a (the reciprocals of those of ∂a/∂z) · 3 training seeds, 50,232 values · hover to read",
-  };
+  let wExp, expH, expMode = "scene";
+  const sceneCap = (who) => `Isaac Lab, ${who} (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2`;
   SLIDES.expansion = {
     async init() {
-      const [lat, sv] = await Promise.all([load("latent"), load("singular_values")]);
-      expL = latentChart(document.getElementById("expLatent"), lat, { arm: "vanilla" });
-      const d = sv.inverse;
+      wExp = inferenceWidget("sceneInfV", "vanilla");
+      paneSwitch("segExp", { scene: "expScenePane", hist: "expHistPane" }, document.getElementById("expCap"), {
+        scene: sceneCap("Vanilla CFM"),
+        hist: "Isaac Lab, Vanilla CFM · singular values of the inverse map ∂z/∂a (the reciprocals of those of ∂a/∂z) · 3 training seeds, 50,232 values · hover to read",
+      }, (v) => { expMode = v; v === "scene" ? wExp.reset() : (wExp.stop(), expH.play()); });
+      const d = (await load("singular_values")).inverse;
       expH = histChart(document.getElementById("expHist"), { edges: d.edges, lo: 1e-2, hi: 1e6, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂z/∂a", readout: invReadout });
-      expH.set([{ key: "v", share: d.vanilla.share, color: "#b4b4b8", label: "Vanilla CFM", labelColor: C.ink }]);
-      document.getElementById("expCap").textContent = expCaps.latent;
-      seg(document.getElementById("segExp"), (v) => {
-        expMode = v;
-        document.getElementById("expLatent").hidden = v !== "latent";
-        document.getElementById("expHist").hidden = v !== "hist";
-        document.getElementById("expCap").textContent = expCaps[v];
-        (v === "latent" ? expL : expH).play();
-      });
+      expH.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
     },
-    async enter(s) { await load("latent"); await load("singular_values"); (expMode === "latent" ? expL : expH)?.play(); },
+    async enter() {
+      await load("singular_values");
+      if (expMode !== "scene") return expH.play();
+      await wExp.reset();
+      if (window.SHOT) wExp.demo();
+    },
+    leave() { wExp.stop(); },
   };
 
   let hM, morphStop = () => {};
@@ -522,7 +535,7 @@ window.SLIDES = {};
       const ymax = 1.12 * Math.max(d3.max(d.vanilla.share), d3.max(d.lolip.share));
       hM = histChart(document.getElementById("histMorph"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax, ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
       hM.setFloor(sv.floor, "floor", 0);
-      const ci = d3.interpolateRgb("#b4b4b8", C.pink);
+      const ci = (t) => d3.interpolateRgb(cssVar("--hist-grey"), cssVar("--pink"))(t);
       const set = (t) => {
         const sh = t <= 0 ? d.vanilla.share : t >= 1 ? d.lolip.share : share(t);
         hM.set([{ key: "m", share: sh, color: ci(t), opacity: .9, label: t < .5 ? "Vanilla CFM" : "LoLip", labelColor: t < .5 ? C.ink : C.pink, bold: t >= .5, side: t < .5 ? "left" : "right" }]);
@@ -536,14 +549,20 @@ window.SLIDES = {};
         morphStop = tween(2200, (k) => { const t = d3.easeCubicInOut(k); range.value = t * 1000; set(t); hM.draw(1); }, 1700);
       };
       document.getElementById("morphPlay").addEventListener("click", () => this.run());
+      addEventListener("themechange", () => { set(range.value / 1000); hM.draw(1); });
     },
     async enter() { await load("singular_values"); this.run?.(); },
     leave() { morphStop(); },
   };
 
-  let bS;
+  let wSpread, bS, spreadMode = "scene";
   SLIDES.spread = {
     async init() {
+      wSpread = spreadWidget("sceneSpreadL", "lolip");
+      paneSwitch("segSpread", { scene: "spreadScenePane", bars: "spreadBarsPane" }, document.getElementById("spreadCap"), {
+        scene: "Isaac Lab, LoLip and Vanilla CFM (training seed 0) · the same 8 far-apart noises for both policies; the noises and the drawing scale are chosen for illustration · robot: 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)",
+        bars: "LIBERO-Goal · standard deviation over 256 noise samples of each of the 112 action values (16 steps × 7 dimensions), averaged over the 112 values and over 128 states per task",
+      }, (v) => { spreadMode = v; v === "scene" ? wSpread.run() : (wSpread.stop(), bS.play()); });
       const d = await load("action_std");
       const groups = d.tasks.map((t) => ({ name: t.name, vanilla: { mean: t.vanilla }, lolip: { mean: t.lolip } }));
       const mx = d3.max(groups, (g) => g.lolip.mean);
@@ -551,23 +570,15 @@ window.SLIDES = {};
       const lo = d3.min(d.tasks, (t) => t.ratio), hi = d3.max(d.tasks, (t) => t.ratio);
       document.getElementById("spreadRange").textContent = `${lo.toFixed(2)}–${hi.toFixed(2)}`;
     },
-    async enter() { await load("action_std"); bS.play(); },
+    async enter() { await load("action_std"); spreadMode === "scene" ? wSpread.run() : bS.play(); },
+    leave() { wSpread.stop(); },
   };
 
-  let sepL, sepArm = "vanilla";
+  let wSep;
   SLIDES.separation = {
-    async init() {
-      sepL = latentChart(document.getElementById("sepLatent"), await load("latent"), { arm: "vanilla" });
-      seg(document.getElementById("segSep"), (v) => { sepArm = v; sepL.to(v); });
-    },
-    async enter() {
-      await load("latent");
-      sepL.play();
-      playVid("vReachV", "vReachL");
-      // show the change: after the dots settle, morph to LoLip once
-      setTimeout(() => { if (sepArm === "vanilla" && document.getElementById("separation").classList.contains("active")) document.querySelector('#segSep [data-v="lolip"]').click(); }, 2600);
-    },
-    leave() { stopVid("vReachV", "vReachL"); sepArm = "vanilla"; const b = document.querySelector('#segSep [data-v="vanilla"]'); if (b.getAttribute("aria-pressed") !== "true") b.click(); },
+    init() { wSep = inferenceWidget("sceneInfL", "lolip"); },
+    async enter() { await wSep.reset(); if (window.SHOT) wSep.demo(); },
+    leave() { wSep.stop(); },
   };
 
   let bD;
@@ -617,23 +628,23 @@ window.SLIDES = {};
       const y = d3.scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
       svg.append("text").attr("x", m.l).attr("y", 14).attr("font-size", 14).attr("font-weight", 550).text("Plate insertion · validation success");
       for (const t of [0, .5, 1]) {
-        svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).attr("stroke", t ? "#efedea" : "#d9d7d3");
-        svg.append("text").attr("x", m.l - 8).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 10.5).attr("fill", "#8b8b91").text(t * 100 + "%");
+        svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t ? "var(--gridline)" : "var(--axis)");
+        svg.append("text").attr("x", m.l - 8).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t * 100 + "%");
       }
-      for (const t of [0, 20e3, 40e3, 60e3, 80e3]) svg.append("text").attr("x", x(t)).attr("y", H - 12).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 10.5).attr("fill", "#8b8b91").text(t ? `${t / 1e3}k` : "0");
+      for (const t of [0, 20e3, 40e3, 60e3, 80e3]) svg.append("text").attr("x", x(t)).attr("y", H - 12).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t ? `${t / 1e3}k` : "0");
       svg.append("text").attr("x", W - m.r).attr("y", H - 12).attr("text-anchor", "end").attr("class", "axis-label").attr("dx", 46).text("env steps");
       const cid = "clipReal";
       const clip = svg.append("defs").append("clipPath").attr("id", cid).append("rect").attr("height", H).attr("width", 0);
       const g = svg.append("g").attr("clip-path", `url(#${cid})`);
       const ser = [["vanilla", C.greyLine, 1.8, "6 3", "Vanilla CFM"], ["lolip", C.pink, 2.6, null, "LoLip"]];
       for (const [k, c, w, dash] of ser) {
-        g.append("path").attr("fill", "none").attr("stroke", c).attr("stroke-width", w).attr("stroke-dasharray", dash).attr("d", d3.line().x((_, i) => x(d.steps[i])).y((v) => y(v))(d[k]));
-        g.selectAll(null).data(d[k]).join("circle").attr("cx", (_, i) => x(d.steps[i])).attr("cy", (v) => y(v)).attr("r", k === "lolip" ? 3.6 : 3).attr("fill", k === "lolip" ? c : "#fff").attr("stroke", c).attr("stroke-width", 1.5);
+        g.append("path").style("fill", "none").style("stroke", c).attr("stroke-width", w).attr("stroke-dasharray", dash).attr("d", d3.line().x((_, i) => x(d.steps[i])).y((v) => y(v))(d[k]));
+        g.selectAll(null).data(d[k]).join("circle").attr("cx", (_, i) => x(d.steps[i])).attr("cy", (v) => y(v)).attr("r", k === "lolip" ? 3.6 : 3).style("fill", k === "lolip" ? c : "#fff").style("stroke", c).attr("stroke-width", 1.5);
       }
       const ends = svg.append("g").attr("opacity", 0);
-      for (const [k, c, , , lab] of ser) ends.append("text").attr("x", W - m.r + 8).attr("y", y(d[k].at(-1))).attr("dy", ".32em").attr("font-size", 14).attr("font-weight", k === "lolip" ? 650 : 450).attr("fill", c).text(pct(d[k].at(-1)));
-      const hov = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", C.ink).attr("opacity", 0);
-      svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      for (const [k, c, , , lab] of ser) ends.append("text").attr("x", W - m.r + 8).attr("y", y(d[k].at(-1))).attr("dy", ".32em").attr("font-size", 14).attr("font-weight", k === "lolip" ? 650 : 450).style("fill", c).text(pct(d[k].at(-1)));
+      const hov = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).style("stroke", C.ink).attr("opacity", 0);
+      svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).style("fill", "transparent")
         .on("pointermove", (e) => {
           const i = d3.minIndex(d.steps, (s) => Math.abs(s - x.invert(d3.pointer(e)[0])));
           hov.attr("x1", x(d.steps[i])).attr("x2", x(d.steps[i])).attr("opacity", .3);
