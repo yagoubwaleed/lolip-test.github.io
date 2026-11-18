@@ -756,27 +756,30 @@ window.SLIDES = {};
     async init() {
       const d = (await load("real_world")).plate;
       const el = document.getElementById("curveReal");
-      const W = 640, H = 240, m = { l: 42, r: 52, t: 30, b: 34 };
+      const W = 560, H = 420, m = { l: 46, r: 104, t: 12, b: 52 };          // 4:3, the video's aspect
       const svg = svgEl(el, W, H);
       const x = d3.scaleLinear().domain([0, d3.max(d.steps)]).range([m.l, W - m.r]);
       const y = d3.scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
-      svg.append("text").attr("x", m.l).attr("y", 14).attr("font-size", 14).attr("font-weight", 550).text("Plate insertion · validation success");
-      for (const t of [0, .5, 1]) {
+      for (const t of [0, .25, .5, .75, 1]) {
         svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t ? "var(--gridline)" : "var(--axis)");
-        svg.append("text").attr("x", m.l - 8).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t * 100 + "%");
+        svg.append("text").attr("x", m.l - 10).attr("y", y(t)).attr("dy", ".32em").attr("text-anchor", "end").attr("class", "mono").attr("font-size", 12).style("fill", "var(--tick)").text(t * 100 + "%");
       }
-      for (const t of [0, 20e3, 40e3, 60e3, 80e3]) svg.append("text").attr("x", x(t)).attr("y", H - 12).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 10.5).style("fill", "var(--tick)").text(t ? `${t / 1e3}k` : "0");
-      svg.append("text").attr("x", W - m.r).attr("y", H - 12).attr("text-anchor", "end").attr("class", "axis-label").attr("dx", 46).text("env steps");
+      for (const t of [0, 20e3, 40e3, 60e3, 80e3]) svg.append("text").attr("x", x(t)).attr("y", H - m.b + 22).attr("text-anchor", "middle").attr("class", "mono").attr("font-size", 12).style("fill", "var(--tick)").text(t ? `${t / 1e3}k` : "0");
+      svg.append("text").attr("x", (m.l + W - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "axis-label").attr("font-size", 13.5).text("Environment steps");
       const cid = "clipReal";
       const clip = svg.append("defs").append("clipPath").attr("id", cid).append("rect").attr("height", H).attr("width", 0);
       const g = svg.append("g").attr("clip-path", `url(#${cid})`);
-      const ser = [["vanilla", C.greyLine, 1.8, "6 3", "Vanilla CFM"], ["lolip", C.pink, 2.6, null, "LoLip"]];
+      const ser = [["vanilla", C.greyLine, 2, "6 3", "Vanilla CFM"], ["lolip", C.pink, 2.8, null, "LoLip"]];
       for (const [k, c, w, dash] of ser) {
         g.append("path").style("fill", "none").style("stroke", c).attr("stroke-width", w).attr("stroke-dasharray", dash).attr("d", d3.line().x((_, i) => x(d.steps[i])).y((v) => y(v))(d[k]));
-        g.selectAll(null).data(d[k]).join("circle").attr("cx", (_, i) => x(d.steps[i])).attr("cy", (v) => y(v)).attr("r", k === "lolip" ? 3.6 : 3).style("fill", k === "lolip" ? c : "#fff").style("stroke", c).attr("stroke-width", 1.5);
+        g.selectAll(null).data(d[k]).join("circle").attr("cx", (_, i) => x(d.steps[i])).attr("cy", (v) => y(v)).attr("r", k === "lolip" ? 4 : 3.4).style("fill", k === "lolip" ? c : "var(--bg)").style("stroke", c).attr("stroke-width", 1.6);
       }
-      const ends = svg.append("g").attr("opacity", 0);
-      for (const [k, c, , , lab] of ser) ends.append("text").attr("x", W - m.r + 8).attr("y", y(d[k].at(-1))).attr("dy", ".32em").attr("font-size", 14).attr("font-weight", k === "lolip" ? 650 : 450).style("fill", c).text(pct(d[k].at(-1)));
+      const ends = svg.append("g").attr("opacity", 0);                        // direct labels at the line ends
+      for (const [k, c, , , lab] of ser) {
+        const t = ends.append("text").attr("x", W - m.r + 12).attr("y", y(d[k].at(-1))).attr("dy", ".32em").attr("font-size", 14).style("fill", c);
+        t.append("tspan").attr("font-weight", 600).text(pct(d[k].at(-1)));
+        t.append("tspan").attr("dx", 6).attr("font-weight", 400).text(lab);
+      }
       const hov = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).style("stroke", C.ink).attr("opacity", 0);
       svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).style("fill", "transparent")
         .on("pointermove", (e) => {

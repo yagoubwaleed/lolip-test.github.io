@@ -207,15 +207,19 @@
   </section>
 
   <!-- 10 -->
-  <section class="slide" id="real" data-title="Real World">
-    <div>
+  <section class="slide wide" id="real" data-title="Real World">
+    <div class="head">
       <h2 data-a style="--d:1">Result: LoLip learns real-world RL tasks <b>in under 100 episodes</b>.</h2>
-      <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
-      <p class="lede" data-a style="--d:3">Validation success rate after 96k environment steps: LoLip 90%, Vanilla CFM 20%.</p>
+      <div>
+        <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
+        <p class="lede" data-a style="--d:3">Validation success rate after 96k environment steps: LoLip 90%, Vanilla CFM 20%.</p>
+      </div>
     </div>
-    <div class="fig rw" data-a style="--d:2">
-      <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div>
-      <div id="curveReal"></div>
+    <div class="fig rw" data-a style="--d:3">
+      <div class="rw-panel"><div class="panel-label">After RL · 5× speed</div>
+        <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div></div>
+      <div class="rw-panel"><div class="panel-label">Validation success during RL</div><div id="curveReal"></div></div>
+      <div class="cap rw-cap">YAM bimanual plate insertion · validation success rate over RL training, LoLip and Vanilla CFM · video: the LoLip policy after RL</div>
     </div>
   </section>
 

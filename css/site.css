@@ -163,7 +163,7 @@ h2 b { font-weight: 600; }
 
 /* charts */
 .fig svg text { fill: var(--ink); }
-.axis-label { font-size: 12.5px; fill: var(--muted); }
+.axis-label, .fig svg .axis-label { font-size: 12.5px; fill: var(--muted); }
 .tip {
   position: absolute; pointer-events: none; z-index: 30; padding: 9px 12px; border-radius: 10px; background: var(--ink); color: var(--on-ink);
   font-size: 12.5px; line-height: 1.45; white-space: nowrap; opacity: 0; transform: translate(-50%, calc(-100% - 12px));
@@ -272,7 +272,9 @@ h2 b { font-weight: 600; }
 .play { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--hair); background: var(--surface); color: var(--ink); cursor: pointer; display: grid; place-items: center; flex: none; transition: all .3s; }
 .play:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
-.rw { display: grid; grid-template-columns: 1fr; gap: 14px; width: min(100%, calc((100vh - 280px) / 1.15)); justify-self: center; }
+.wide .fig.rw { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 40px; max-width: min(900px, calc((100vh - 360px) * 2.6)); align-items: start; }
+.panel-label { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.rw-cap { grid-column: 1 / -1; margin-top: 4px; }
 .rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); }
 .rw-vid video { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
@@ -302,7 +304,7 @@ h2 b { font-weight: 600; }
   .wide .head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .diagrams { grid-template-columns: 1fr; }
   .dg { height: auto; }
-  .rw { width: 100%; }
+  .wide .fig.rw { grid-template-columns: 1fr; max-width: 100%; }
   .arrow { top: auto; bottom: 18px; margin-top: 0; width: 48px; height: 48px; }
   .arrow.prev { left: 16px; } .arrow.next { right: 16px; }
   .hint { display: none; }
