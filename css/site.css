@@ -180,10 +180,11 @@ b, strong { font-weight: 600; }
 .bnav button[aria-current="true"] i { background: currentColor; }
 .bnav button:hover { background: var(--soft); }
 /* real world: video and curve side by side, same height */
-.rw-pair { display: grid; grid-template-columns: .6fr 1fr; align-items: center; gap: 40px; width: min(100%, calc((100cqh - 26px) * 4 / 3 * 1.6 + 40px)); }   /* video 0.6x the curve */
+.rw-pair { display: grid; grid-template-columns: 600fr 352fr; align-items: start; gap: 36px; width: min(100%, calc((100cqh - 26px) * 952 / 330 + 36px)); }   /* plot 600x330 viewBox; video = its y-axis height (264) at 4:3 */
 .rw-item { min-width: 0; }
 .rw-label { font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; height: 18px; }
-.rw-pair .rw-vid, .rw-pair .rw-chart { width: 100%; aspect-ratio: 4 / 3; }
+.rw-pair .rw-chart { width: 100%; aspect-ratio: 600 / 330; }
+.rw-pair .rw-vid { width: 100%; aspect-ratio: 4 / 3; }
 .rw-pair .rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); margin: 0; }
 .rw-pair .rw-vid video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rw-chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -321,9 +322,6 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 .play { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--hair); background: var(--surface); color: var(--ink); cursor: pointer; display: grid; place-items: center; flex: none; transition: all .3s; }
 .play:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
-.rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); width: min(100%, 400px, calc((100vh - 470px) * 1.33)); margin-top: 26px; }
-.rw-vid + .cap { margin-top: 8px; }
-.rw-vid video { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
 .legend span { display: inline-flex; align-items: center; gap: 8px; cursor: default; white-space: nowrap; }
@@ -370,16 +368,6 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 
 .shot *, .shot *::before, .shot *::after { transition: none !important; animation: none !important; }
 
-/* ------------------------------------------------------------------ centred layout (all slides after the intro) */
+/* ------------------------------------------------------------------ line breaks: no single word left on a line */
 h1, h2 { text-wrap: balance; }
 .lede, .points li, .insights .v, .dstep { text-wrap: pretty; }
-.tpl-head { text-align: center; }
-.tpl-head h2 { margin-left: auto; margin-right: auto; max-width: 24em; }
-.tpl-head .lede { margin-left: auto; margin-right: auto; max-width: 46em; }
-.tpl-head .eq .katex-display, .tpl-head .eq .katex-display > .katex { text-align: center; }
-.tpl-head .eq-small { text-align: center; }
-.build .cap { text-align: center; max-width: 64em; margin-left: auto; margin-right: auto; }
-.full h2 { text-align: center; }
-.insights h2 { text-align: center; }
-.fig-head { justify-content: center; flex-wrap: wrap; gap: 10px 18px; border-bottom: 0; padding-bottom: 0; margin-bottom: 14px; }
-.fig-ctl { margin-left: 0; justify-content: center; }

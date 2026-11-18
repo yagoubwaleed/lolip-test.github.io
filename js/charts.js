@@ -725,7 +725,7 @@ window.SLIDES = {};
     async init() {
       const d = (await load("real_world")).plate;
       const el = document.getElementById("curveReal");
-      const W = 560, H = 420, m = { l: 46, r: 104, t: 12, b: 52 };          // 4:3, the video's aspect
+      const W = 600, H = 330, m = { l: 46, r: 104, t: 14, b: 52 };          // the video beside it spans the y axis (t to H - b)
       const svg = svgEl(el, W, H);
       const x = d3.scaleLinear().domain([0, d3.max(d.steps)]).range([m.l, W - m.r]);
       const y = d3.scaleLinear().domain([0, 1]).range([H - m.b, m.t]);
@@ -758,6 +758,9 @@ window.SLIDES = {};
         })
         .on("pointerleave", () => { hov.attr("opacity", 0); hideTip(); });
       let cancel = () => {};
+      // video: same height as the y axis, top aligned with 100%
+      const vid = document.getElementById("rwVid");
+      new ResizeObserver(() => { const w = el.getBoundingClientRect().width; vid.style.marginTop = `${(m.t * w) / W}px`; }).observe(el);
       cReal = { play() { cancel(); ends.attr("opacity", 0); cancel = tween(1900, (k) => { clip.attr("width", W * ease(k)); ends.attr("opacity", clamp(k * 4 - 3)); }); } };
     },
     async enter() { await load("real_world"); },
