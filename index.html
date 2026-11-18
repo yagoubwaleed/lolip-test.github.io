@@ -79,7 +79,7 @@
     <div class="head">
       <h2 data-a style="--d:1">Problem 1: Forward flows are <b>highly contractive</b>.</h2>
       <div>
-        <p class="lede" data-a style="--d:2">We pick 8 noises far apart in the latent space and run the standard flow policy (Vanilla CFM) from each. The 8 resulting actions are nearly identical, and so are the 8 robot motions: the fingertip paths differ by about 2 mm. RL that acts on the noise therefore has little to explore.</p>
+        <p class="lede" data-a style="--d:2">We pick 8 noises far apart in the latent space and run the standard flow policy (Vanilla CFM) from each. The 8 resulting actions are nearly identical, and so are the 8 robot motions. RL that acts on the noise therefore has little to explore.</p>
         <p class="lede" data-a style="--d:3">Across all noise directions, the median singular value of ∂a/∂z is <span id="contrMed">0.0037</span>: a change in the noise is typically scaled down by a factor of about <span id="contrX">270</span> in the action.</p>
       </div>
     </div>
@@ -138,7 +138,7 @@
     <div class="head">
       <h2 data-a style="--d:1">Fixing Problem 1: LoLip makes the forward flow <b>less contractive</b>.</h2>
       <div>
-        <p class="lede" data-a style="--d:2">The same 8 noises, run through the LoLip policy, give 8 clearly different actions; the fingertip paths now differ by about 16 mm, against 2 mm for Vanilla CFM.</p>
+        <p class="lede" data-a style="--d:2">The same 8 noises, run through the LoLip policy, give 8 clearly different actions and robot motions.</p>
         <p class="lede" data-a style="--d:3">On LIBERO-Goal, sampling 256 noises at a fixed robot state, LoLip's action standard deviation is <span id="spreadRange">1.95–2.12</span> times that of Vanilla CFM on each of the 4 tasks.</p>
       </div>
     </div>
