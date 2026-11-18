@@ -72,12 +72,12 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>02</i> · Problem 1</p>
       <h2 data-a style="--d:1">Forward flows are <b>contractive</b>.</h2>
-      <p class="lede" data-a style="--d:2">Changing the noise barely changes the action, so RL in noise space has almost nothing to explore.</p>
-      <div class="stat" data-a style="--d:3"><span class="big" id="contrMed">—</span><span class="lbl">how much the median noise direction shrinks on its way to an action</span></div>
+      <p class="lede" data-a style="--d:2">We measure how much a small change in the input noise changes the action a standard flow policy (Vanilla CFM) outputs. The change in the action is far smaller than the change in the noise, which leaves RL that acts on the noise little to explore.</p>
+      <div class="stat" data-a style="--d:3"><span class="big" id="contrMed">—</span><span class="lbl">median factor by which a change in the noise is scaled down in the action (from the singular values of ∂a/∂z)</span></div>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="histForward"></div>
-      <div class="cap">Hover to read the share of directions below a stretch · Isaac Lab, Vanilla CFM · all 28 singular values of ∂a/∂z, 100-step flow · 3 training seeds, 50,232 values</div>
+      <div class="cap">Isaac Lab, Vanilla CFM · all 28 singular values of the Jacobian ∂a/∂z of the 100-step flow · 3 training seeds, 50,232 values · hover to read</div>
     </div>
   </section>
 
@@ -87,8 +87,9 @@
       <p class="eyebrow" data-a style="--d:0"><i>03</i> · Problem 2</p>
       <h2 data-a style="--d:1">The reverse process is <b>expansive</b>.</h2>
       <ul class="points">
-        <li data-a style="--d:2">Behaviors are intermixed: nearby noises lead to different action modes.</li>
-        <li data-a style="--d:3">Supervised steering has to learn in an <b>unsmooth latent space</b>.</li>
+        <li data-a style="--d:2">Each dot is one demonstration's action, mapped back through the flow to the noise that produces it.</li>
+        <li data-a style="--d:3">For Vanilla CFM, the noises of Pick Mug and Pick Bowl demonstrations are mixed together, although their actions are clearly separated.</li>
+        <li data-a style="--d:4">A noise policy trained on these noises (DSBC) has to fit a target that switches between tasks over short distances in noise space.</li>
       </ul>
     </div>
     <div class="fig" data-a style="--d:2">
@@ -105,7 +106,7 @@
       <p class="eyebrow" data-a style="--d:0"><i>04</i> · Idea</p>
       <h2 data-a style="--d:1">Don't let any denoising step contract too much.</h2>
       <div class="eq" data-a style="--d:2" id="eqMain"></div>
-      <p class="lede" data-a style="--d:3"><b class="pk">LoLip</b> penalizes any denoising step that shrinks its input below a limit.</p>
+      <p class="lede" data-a style="--d:3"><b class="pk">LoLip</b> adds one term to the flow-matching loss: for a random unit direction <i>u</i>, it penalizes any denoising step that scales <i>u</i> by less than <i>s</i><sub>min</sub>.</p>
       <div class="eq-small" data-a style="--d:4" id="eqStep"></div>
     </div>
     <div class="fig" data-a style="--d:3">
@@ -114,7 +115,7 @@
         <button class="play" id="morphPlay" aria-label="Replay"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg></button>
         <span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span>
       </div>
-      <div class="cap">Drag to move from Vanilla CFM to LoLip · Isaac Lab, ∂a/∂z singular values, 3 training seeds · endpoints measured, in between interpolated per quantile</div>
+      <div class="cap">Drag to move from Vanilla CFM to LoLip · Isaac Lab, singular values of ∂a/∂z, 3 training seeds · both end points are measured; the frames in between are interpolated</div>
     </div>
   </section>
 
@@ -123,12 +124,12 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>05</i> · Fix 1</p>
       <h2 data-a style="--d:1">LoLip <b>fixes the forward contraction</b>.</h2>
-      <p class="lede" data-a style="--d:2">Different noises now give different actions, so RL in noise space explores more.</p>
-      <div class="stat" data-a style="--d:3"><span class="big">2×</span><span class="lbl" id="spreadLbl">more action spread from fresh noise, on every LIBERO-Goal task</span></div>
+      <p class="lede" data-a style="--d:2">At a fixed robot state, we sample 256 noise vectors, run the flow policy on each, and measure how much the resulting actions vary (their standard deviation).</p>
+      <div class="stat" data-a style="--d:3"><span class="big">≈2×</span><span class="lbl" id="spreadLbl">LoLip's actions vary about twice as much as Vanilla CFM's, on each of 4 LIBERO-Goal tasks</span></div>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="barsSpread"></div>
-      <div class="cap">LIBERO-Goal · std of the 112 action numbers over 256 fresh noises, mean over 128 states per task</div>
+      <div class="cap">LIBERO-Goal · standard deviation over 256 noise samples of each of the 112 action values (16 steps × 7 dimensions), averaged over the 112 values and over 128 states per task</div>
     </div>
   </section>
 
@@ -137,17 +138,17 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>06</i> · Fix 2</p>
       <h2 data-a style="--d:1">LoLip <b>fixes the reverse expansion</b>.</h2>
-      <p class="lede" data-a style="--d:2">The noise space becomes smooth and separated by action mode, so a noise policy can pick the right behavior.</p>
+      <p class="lede" data-a style="--d:2">For LoLip, the noises of Pick Mug and Pick Bowl demonstrations fall in separate regions. In the videos the robot is asked to pick the mug: with Vanilla CFM it reaches for the bowl, with LoLip for the mug.</p>
       <div class="videos" data-a style="--d:4">
         <div class="vid"><video id="vReachV" muted loop playsinline preload="none" poster="media/reach_vanilla.jpg" src="media/reach_vanilla.mp4"></video><span class="tag">Vanilla CFM</span><span class="res">✕ Picks the bowl</span></div>
         <div class="vid"><video id="vReachL" muted loop playsinline preload="none" poster="media/reach_lolip.jpg" src="media/reach_lolip.mp4"></video><span class="tag l">LoLip</span><span class="res">✓ Picks the mug</span></div>
       </div>
-      <div class="cap" data-a style="--d:5">Asked to pick the mug · base + DSBC noise policy, held-out scene</div>
+      <div class="cap" data-a style="--d:5">Base policy with a DSBC noise policy · one held-out scene</div>
     </div>
     <div class="fig" data-a style="--d:2">
       <div class="seg pink" id="segSep"><span class="knob"></span><button aria-pressed="true" data-v="vanilla">Vanilla CFM</button><button aria-pressed="false" data-v="lolip" class="is-lolip">LoLip</button></div>
       <div id="sepLatent"></div>
-      <div class="cap">Isaac Lab, Pick Mug / Pick Bowl · each dot is one training demo's first action chunk mapped back to noise (PCA) · hover a dot to follow it to its action</div>
+      <div class="cap">Isaac Lab · each dot: one training demonstration's first action chunk, mapped back through the flow to its noise; both spaces shown in 2D (PCA) · hover a dot to see its action</div>
     </div>
   </section>
 
@@ -156,8 +157,8 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>07</i> · Results · supervised steering</p>
       <h2 data-a style="--d:1">LoLip makes <b>DSBC</b> work in multitask settings.</h2>
-      <p class="lede" data-a style="--d:2">One base without the task prompt; a DSBC noise policy that sees the prompt has to steer it to each of 10 tasks.</p>
-      <div class="stat" data-a style="--d:3"><span class="big">64.3%</span><span class="lbl"><b>vs 38.7%</b> for Vanilla CFM<br>mean success over the 10 tasks</span></div>
+      <p class="lede" data-a style="--d:2">LIBERO-Goal, 10 tasks. The base policy is trained without the task instruction. A DSBC noise policy, which receives the instruction, chooses the base policy's noise so that it performs the requested task.</p>
+      <div class="stat" data-a style="--d:3"><span class="big">64.3%</span><span class="lbl"><b>vs 38.7%</b> for Vanilla CFM<br>success rate averaged over the 10 tasks</span></div>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="barsDSBC"></div>
@@ -170,8 +171,8 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>08</i> · Results · RL in noise space</p>
       <h2 data-a style="--d:1">LoLip makes <b>DSRL</b> learn faster, also on long-horizon tasks.</h2>
-      <p class="lede" data-a style="--d:2">A frozen LIBERO-90 base, then SAC picks its noise on a new task.</p>
-      <div class="stat" data-a style="--d:3"><span class="big" id="rlStat">99.0%</span><span class="lbl" id="rlStatLbl">mean success at 500k steps on 4 LIBERO-Goal tasks (Vanilla 82.1%)</span></div>
+      <p class="lede" data-a style="--d:2">A base policy trained on LIBERO-90 is frozen. On a new task, an RL agent (SAC) learns from the task reward which noise to give it.</p>
+      <div class="stat" data-a style="--d:3"><span class="big" id="rlStat">99.0%</span><span class="lbl" id="rlStatLbl"></span></div>
     </div>
     <div class="fig" data-a style="--d:2">
       <div class="seg" id="segRL"><span class="knob"></span><button aria-pressed="true" data-v="goal">LIBERO-Goal</button><button aria-pressed="false" data-v="libero10">LIBERO-10 · long-horizon</button></div>
@@ -185,8 +186,8 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>09</i> · Real world</p>
       <h2 data-a style="--d:1">LoLip learns real-world RL tasks <b>in under 100 episodes</b>.</h2>
-      <p class="lede" data-a style="--d:2">Bimanual plate insertion on YAM arms, with RL in noise space.</p>
-      <div class="stat" data-a style="--d:3"><span class="big">90%</span><span class="lbl"><b>vs 20%</b> for Vanilla CFM<br>plate insertion success after RL</span></div>
+      <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
+      <div class="stat" data-a style="--d:3"><span class="big">90%</span><span class="lbl"><b>vs 20%</b> for Vanilla CFM<br>validation success rate after 96k environment steps</span></div>
     </div>
     <div class="fig rw" data-a style="--d:2">
       <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div>
@@ -211,7 +212,7 @@
     <div>
       <p class="eyebrow" data-a style="--d:0"><i>11</i> · Limitation</p>
       <h2 data-a style="--d:1">LoLip costs some base performance. <b>DSBC wins it back.</b></h2>
-      <p class="lede" data-a style="--d:2">On its own the LoLip base drops from 86% to 70%. DSBC on the pretraining demos brings it to 85%, against 89% for Vanilla.</p>
+      <p class="lede" data-a style="--d:2">LIBERO-90, 20 tasks, base policies trained with the task instruction. Success rate of the base policy alone: Vanilla CFM 86%, LoLip 70%. With a DSBC noise policy trained on the same demonstrations: 89% and 85%.</p>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="barsCost"></div>

@@ -461,15 +461,15 @@ window.SLIDES = {};
     init() { document.getElementById("dgDSRL").innerHTML = dsrlSVG(); document.getElementById("dgDSBC").innerHTML = dsbcSVG(); },
   };
 
-  const fwdReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(s.below)}</span> of directions shrink by more than <span class="mono">${fmtX(1 / v)}</span>`).join("<br>");
-  const invReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(1 - s.below)}</span> of directions stretch by more than <span class="mono">${fmtX(v)}</span>`).join("<br>");
+  const fwdReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(s.below)}</span> of singular values are below <span class="mono">${d3.format(".1~e")(v)}</span><br>(a change in the noise scaled down more than <span class="mono">${fmtX(1 / v)}</span>)`).join("<br>");
+  const invReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(1 - s.below)}</span> of singular values are above <span class="mono">${d3.format(".1~e")(v)}</span><br>(a change in the action scaled up more than <span class="mono">${fmtX(v)}</span>)`).join("<br>");
   const fmtX = (v) => (v >= 1000 ? `${d3.format(",.0f")(v)}×` : v >= 10 ? `${v.toFixed(0)}×` : `${v.toFixed(1)}×`);
 
   let hF;
   SLIDES.contraction = {
     async init() {
       const d = (await load("singular_values")).forward;
-      hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z (stretch of a noise direction)", readout: fwdReadout });
+      hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
       hF.set([{ key: "v", share: d.vanilla.share, color: "#b4b4b8", label: "Vanilla CFM", labelColor: C.ink }]);
       document.getElementById("contrMed").textContent = `${Math.round(1 / d.vanilla.median)}×`;
     },
@@ -478,15 +478,15 @@ window.SLIDES = {};
 
   let expL, expH, expMode = "latent";
   const expCaps = {
-    latent: "Isaac Lab, Vanilla CFM · each dot is one training demo's first action chunk mapped back to noise (PCA) · hover a dot to follow it to its action",
-    hist: "Isaac Lab, Vanilla CFM · singular values of ∂z/∂a = 1 / those of ∂a/∂z · 3 training seeds, 50,232 values · hover to read",
+    latent: "Isaac Lab, Vanilla CFM · each dot: one training demonstration's first action chunk, mapped back through the flow to its noise; both spaces shown in 2D (PCA) · hover a dot to see its action",
+    hist: "Isaac Lab, Vanilla CFM · singular values of the inverse map ∂z/∂a (the reciprocals of those of ∂a/∂z) · 3 training seeds, 50,232 values · hover to read",
   };
   SLIDES.expansion = {
     async init() {
       const [lat, sv] = await Promise.all([load("latent"), load("singular_values")]);
       expL = latentChart(document.getElementById("expLatent"), lat, { arm: "vanilla" });
       const d = sv.inverse;
-      expH = histChart(document.getElementById("expHist"), { edges: d.edges, lo: 1e-2, hi: 1e6, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂z/∂a (stretch of an action direction)", readout: invReadout });
+      expH = histChart(document.getElementById("expHist"), { edges: d.edges, lo: 1e-2, hi: 1e6, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂z/∂a", readout: invReadout });
       expH.set([{ key: "v", share: d.vanilla.share, color: "#b4b4b8", label: "Vanilla CFM", labelColor: C.ink }]);
       document.getElementById("expCap").textContent = expCaps.latent;
       seg(document.getElementById("segExp"), (v) => {
@@ -548,7 +548,7 @@ window.SLIDES = {};
       const mx = d3.max(groups, (g) => g.lolip.mean);
       bS = barChart(document.getElementById("barsSpread"), { groups, yMax: mx * 1.2, yTicks: [0, mx * 0.4, mx * 0.8].map((v) => +v.toPrecision(1)), fmt: (v) => v.toFixed(2), ratio: true });
       const lo = d3.min(d.tasks, (t) => t.ratio), hi = d3.max(d.tasks, (t) => t.ratio);
-      document.getElementById("spreadLbl").innerHTML = `<b>${lo.toFixed(2)}–${hi.toFixed(2)}×</b><br>more action spread from fresh noise, on each of the 4 LIBERO-Goal tasks`;
+      document.getElementById("spreadLbl").innerHTML = `ratio of LoLip's to Vanilla CFM's action standard deviation (${lo.toFixed(2)}–${hi.toFixed(2)}× on the 4 LIBERO-Goal tasks)`;
     },
     async enter() { await load("action_std"); bS.play(); },
   };
@@ -593,8 +593,8 @@ window.SLIDES = {};
         const l = at(d[v], "lolip"), va = at(d[v], "vanilla");
         document.getElementById("rlStat").textContent = pct(l, 1);
         document.getElementById("rlStatLbl").textContent = v === "goal"
-          ? `mean success at 500k steps on 4 LIBERO-Goal tasks (Vanilla CFM ${pct(va, 1)})`
-          : `mean success at 500k steps on 5 LIBERO-10 tasks (Vanilla CFM ${pct(va, 1)})`;
+          ? `success rate after 500k environment steps, averaged over 4 LIBERO-Goal tasks (Vanilla CFM ${pct(va, 1)})`
+          : `success rate after 500k environment steps, averaged over 5 LIBERO-10 tasks (Vanilla CFM ${pct(va, 1)})`;
         document.getElementById("rlCap").textContent = v === "goal"
           ? "Line: mean over 3 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs"
           : "Line: mean over 2 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs";
