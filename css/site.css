@@ -264,7 +264,8 @@ h2 b { font-weight: 600; }
 /* ------------------------------------------------------------------ slide specifics */
 .title-slide h1 { font-size: clamp(30px, 3vw, 48px); line-height: 1.02; letter-spacing: -.045em; font-weight: 500; margin: 0 0 30px; }
 .title-slide h1 b { font-weight: 650; }
-.authors { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--ink-2); max-width: 36em; }
+.authors { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); }
+.authors > div { display: flex; flex-wrap: wrap; gap: 4px 18px; }
 .authors sup { font-size: 10px; color: var(--muted); margin-left: 1px; }
 .affil { font-size: 14px; color: var(--muted); margin-top: 12px; }
 .links { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
