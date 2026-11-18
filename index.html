@@ -1,6 +1,230 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>LoLip test page</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fff;color:#1a1a1a;
-font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}h1{font-weight:400}b{color:#c5426c;font-weight:600}</style>
-</head><body><h1><b>LoLip</b> · GitHub Pages test</h1></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoLip</title>
+<meta name="description" content="Lipschitz-Regularized Pretraining for Efficient Downstream Finetuning">
+<link rel="preload" href="fonts/geist-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="css/site.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="js/charts.js"></script>
+<script defer src="js/deck.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="#intro"><span>Lo</span>Lip</a>
+  <ol id="navList"><span class="pill" id="navPill"></span></ol>
+  <div class="count mono"><b id="countNow">01</b> / <span id="countAll">12</span></div>
+</header>
+<div class="progress" id="progress"></div>
+
+<main class="deck"><div class="track" id="track">
+
+  <!-- 01 -->
+  <section class="slide title-slide" id="intro" data-title="Intro">
+    <div>
+      <p class="eyebrow" data-a style="--d:0">University of Washington · Hitachi · UC Berkeley</p>
+      <h1 data-a style="--d:1">Lipschitz-Regularized <b>Pretraining</b> for <b class="pk">Efficient</b> Downstream Finetuning</h1>
+      <div class="authors" data-a style="--d:2">
+        <span>Shubham Mittal<sup>*1</sup></span><span>Yunchu Zhang<sup>*1</sup></span><span>Waleed Yagoub<sup>*1</sup></span>
+        <span>William Huey<sup>1</sup></span><span>Zev Alvidrez<sup>1</sup></span><span>Kanta Hamasaki<sup>2</sup></span>
+        <span>Andrew Wagenmaker<sup>3</sup></span><span>Abhishek Gupta<sup>1</sup></span>
+      </div>
+      <div class="affil" data-a style="--d:3">*Equal contribution · <sup>1</sup>University of Washington · <sup>2</sup>Hitachi, Ltd. · <sup>3</sup>UC Berkeley</div>
+      <div class="links" data-a style="--d:4">
+        <a class="btn solid" href="#setting" data-go="1">Start the story →</a>
+        <span class="btn soon">Paper · soon</span>
+        <span class="btn soon">Code · soon</span>
+      </div>
+    </div>
+    <div class="fig" data-a style="--d:3">
+      <canvas id="flowCanvas"></canvas>
+      <div class="flow-labels"><span>Noise</span><span>Action</span></div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide full" id="setting" data-title="Setting">
+    <div style="max-width:1180px;margin:0 auto;width:100%">
+      <p class="eyebrow" data-a style="--d:0"><i>01</i> · Setting</p>
+      <h2 data-a style="--d:1"><b>No weight finetuning:</b> adapt a large policy by steering its noise.</h2>
+      <div class="diagrams">
+        <div class="dcard" data-a style="--d:2">
+          <h3>DSRL <span>· noise steering via RL</span></h3>
+          <div class="ref">Wagenmaker et al., 2025</div>
+          <div id="dgDSRL"></div>
+        </div>
+        <div class="dcard" data-a style="--d:3">
+          <h3>DSBC <span>· noise steering via inverted demos</span></h3>
+          <div class="ref">Tang et al., 2026</div>
+          <div id="dgDSBC"></div>
+        </div>
+        <p class="problem" data-a style="--d:5"><b>Problem:</b> both work <span class="pk">inefficiently</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide" id="contraction" data-title="Contraction">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>02</i> · Problem 1</p>
+      <h2 data-a style="--d:1">Forward flows are <b>contractive</b>.</h2>
+      <p class="lede" data-a style="--d:2">Changing the noise barely changes the action, so RL in noise space has almost nothing to explore.</p>
+      <div class="stat" data-a style="--d:3"><span class="big" id="contrMed">—</span><span class="lbl">how much the median noise direction shrinks on its way to an action</span></div>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div id="histForward"></div>
+      <div class="cap">Hover to read the share of directions below a stretch · Isaac Lab, Vanilla CFM · all 28 singular values of ∂a/∂z, 100-step flow · 3 training seeds, 50,232 values</div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide" id="expansion" data-title="Expansion">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>03</i> · Problem 2</p>
+      <h2 data-a style="--d:1">The reverse process is <b>expansive</b>.</h2>
+      <ul class="points">
+        <li data-a style="--d:2">Behaviors are intermixed: nearby noises lead to different action modes.</li>
+        <li data-a style="--d:3">Supervised steering has to learn in an <b>unsmooth latent space</b>.</li>
+      </ul>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div class="seg" id="segExp"><span class="knob"></span><button aria-pressed="true" data-v="latent">Noise space</button><button aria-pressed="false" data-v="hist">Singular values</button></div>
+      <div id="expLatent"></div>
+      <div id="expHist" hidden></div>
+      <div class="cap" id="expCap"></div>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide" id="method" data-title="Method">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>04</i> · Idea</p>
+      <h2 data-a style="--d:1">Don't let any denoising step contract too much.</h2>
+      <div class="eq" data-a style="--d:2" id="eqMain"></div>
+      <p class="lede" data-a style="--d:3"><b class="pk">LoLip</b> penalizes any denoising step that shrinks its input below a limit.</p>
+      <div class="eq-small" data-a style="--d:4" id="eqStep"></div>
+    </div>
+    <div class="fig" data-a style="--d:3">
+      <div id="histMorph"></div>
+      <div class="morph">
+        <button class="play" id="morphPlay" aria-label="Replay"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg></button>
+        <span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span>
+      </div>
+      <div class="cap">Drag to move from Vanilla CFM to LoLip · Isaac Lab, ∂a/∂z singular values, 3 training seeds · endpoints measured, in between interpolated per quantile</div>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide" id="spread" data-title="Spread">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>05</i> · Fix 1</p>
+      <h2 data-a style="--d:1">LoLip <b>fixes the forward contraction</b>.</h2>
+      <p class="lede" data-a style="--d:2">Different noises now give different actions, so RL in noise space explores more.</p>
+      <div class="stat" data-a style="--d:3"><span class="big">2×</span><span class="lbl" id="spreadLbl">more action spread from fresh noise, on every LIBERO-Goal task</span></div>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div id="barsSpread"></div>
+      <div class="cap">LIBERO-Goal · std of the 112 action numbers over 256 fresh noises, mean over 128 states per task</div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section class="slide" id="separation" data-title="Separation">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>06</i> · Fix 2</p>
+      <h2 data-a style="--d:1">LoLip <b>fixes the reverse expansion</b>.</h2>
+      <p class="lede" data-a style="--d:2">The noise space becomes smooth and separated by action mode, so a noise policy can pick the right behavior.</p>
+      <div class="videos" data-a style="--d:4">
+        <div class="vid"><video id="vReachV" muted loop playsinline preload="none" poster="media/reach_vanilla.jpg" src="media/reach_vanilla.mp4"></video><span class="tag">Vanilla CFM</span><span class="res">✕ Picks the bowl</span></div>
+        <div class="vid"><video id="vReachL" muted loop playsinline preload="none" poster="media/reach_lolip.jpg" src="media/reach_lolip.mp4"></video><span class="tag l">LoLip</span><span class="res">✓ Picks the mug</span></div>
+      </div>
+      <div class="cap" data-a style="--d:5">Asked to pick the mug · base + DSBC noise policy, held-out scene</div>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div class="seg pink" id="segSep"><span class="knob"></span><button aria-pressed="true" data-v="vanilla">Vanilla CFM</button><button aria-pressed="false" data-v="lolip" class="is-lolip">LoLip</button></div>
+      <div id="sepLatent"></div>
+      <div class="cap">Isaac Lab, Pick Mug / Pick Bowl · each dot is one training demo's first action chunk mapped back to noise (PCA) · hover a dot to follow it to its action</div>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide" id="dsbc" data-title="DSBC">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>07</i> · Results · supervised steering</p>
+      <h2 data-a style="--d:1">LoLip makes <b>DSBC</b> work in multitask settings.</h2>
+      <p class="lede" data-a style="--d:2">One base without the task prompt; a DSBC noise policy that sees the prompt has to steer it to each of 10 tasks.</p>
+      <div class="stat" data-a style="--d:3"><span class="big">64.3%</span><span class="lbl"><b>vs 38.7%</b> for Vanilla CFM<br>mean success over the 10 tasks</span></div>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div id="barsDSBC"></div>
+      <div class="cap">LIBERO-Goal · 3 base seeds × 3 eval seeds × 25 episodes · error bars: 1 sd over base seeds</div>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section class="slide" id="dsrl" data-title="DSRL">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>08</i> · Results · RL in noise space</p>
+      <h2 data-a style="--d:1">LoLip makes <b>DSRL</b> learn faster, also on long-horizon tasks.</h2>
+      <p class="lede" data-a style="--d:2">A frozen LIBERO-90 base, then SAC picks its noise on a new task.</p>
+      <div class="stat" data-a style="--d:3"><span class="big" id="rlStat">99.0%</span><span class="lbl" id="rlStatLbl">mean success at 500k steps on 4 LIBERO-Goal tasks (Vanilla 82.1%)</span></div>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div class="seg" id="segRL"><span class="knob"></span><button aria-pressed="true" data-v="goal">LIBERO-Goal</button><button aria-pressed="false" data-v="libero10">LIBERO-10 · long-horizon</button></div>
+      <div id="curvesRL"></div>
+      <div class="cap" id="rlCap">Line: mean over 3 RL seeds · band: lowest to highest seed · 25 episodes per eval</div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" id="real" data-title="Real World">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>09</i> · Real world</p>
+      <h2 data-a style="--d:1">LoLip learns real-world RL tasks <b>in under 100 episodes</b>.</h2>
+      <p class="lede" data-a style="--d:2">Bimanual plate insertion on YAM arms, with RL in noise space.</p>
+      <div class="stat" data-a style="--d:3"><span class="big">90%</span><span class="lbl"><b>vs 20%</b> for Vanilla CFM<br>plate insertion success after RL</span></div>
+    </div>
+    <div class="fig rw" data-a style="--d:2">
+      <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div>
+      <div id="curveReal"></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide full" id="insights" data-title="Insights">
+    <div class="insights">
+      <p class="eyebrow" data-a style="--d:0"><i>10</i> · Core insights</p>
+      <h2 data-a style="--d:1">Shape the noise → action map during pretraining.</h2>
+      <div class="row" data-a style="--d:2"><div class="k">PROBLEM</div><div class="v">Standard flow policies are highly <b>contractive</b>: moving the noise barely moves the action, which hurts both RL and supervised steering in latent space.</div></div>
+      <div class="row" data-a style="--d:3"><div class="k">CAUSE</div><div class="v">Flow matching fits the action distribution but never shapes the <b>noise → action map</b>.</div></div>
+      <div class="row" data-a style="--d:4"><div class="k">FIX</div><div class="v"><b class="pk">LoLip</b> lower-bounds the singular values of each denoising step's Jacobian, which lower-bounds the stretch of the whole flow.</div></div>
+      <div class="row" data-a style="--d:5"><div class="k">RESULT</div><div class="v">A <b>less contractive</b> forward map and <b>more stable inversion</b> give better supervised steering (DSBC) and latent-space RL (DSRL).</div></div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" id="cost" data-title="Cost">
+    <div>
+      <p class="eyebrow" data-a style="--d:0"><i>11</i> · Limitation</p>
+      <h2 data-a style="--d:1">LoLip costs some base performance. <b>DSBC wins it back.</b></h2>
+      <p class="lede" data-a style="--d:2">On its own the LoLip base drops from 86% to 70%. DSBC on the pretraining demos brings it to 85%, against 89% for Vanilla.</p>
+    </div>
+    <div class="fig" data-a style="--d:2">
+      <div id="barsCost"></div>
+      <div class="cap">LIBERO-90, 20 tasks · mean over 3 training seeds, 25 episodes per task · error bars: 1 sd over seeds</div>
+    </div>
+  </section>
+
+</div></main>
+
+<button class="arrow prev" id="prev" aria-label="Previous slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
+<button class="arrow next pulse" id="next" aria-label="Next slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+<div class="hint" id="hint">Use <kbd>←</kbd> <kbd>→</kbd> or the arrows</div>
+<div class="tip" id="tip"></div>
+</body>
+</html>
