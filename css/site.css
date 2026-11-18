@@ -346,6 +346,7 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 }
 @media (max-width: 960px) {
   .full h2.one-line { white-space: normal; }
+  .setting-wrap h2 { width: auto; left: 0; transform: none; }
   .slide.tpl { display: block; overflow-y: auto; padding: 24px 16px 96px; }
   .tpl-body { margin-top: 18px; }
   .fig-main { height: auto; min-height: 0; container-type: normal; }
@@ -379,3 +380,11 @@ h1, h2 { text-wrap: balance; }
 /* titles: one line on desktop */
 .tpl-head h2, .insights h2 { white-space: nowrap; font-size: clamp(22px, 2.2vw, 30px); max-width: none; }
 @media (max-width: 960px) { .tpl-head h2, .insights h2 { white-space: normal; } }
+
+/* setting slide: equal space above and below the cards, cards scaled to the title */
+.setting-wrap { max-width: 880px; margin: 0 auto; width: 100%; }
+.setting-wrap h2 { margin-bottom: 34px; width: max-content; position: relative; left: 50%; transform: translateX(-50%); }   /* centred over the cards even when wider */
+.setting-wrap .diagrams { max-width: none; column-gap: 28px; row-gap: 34px; }
+.setting-wrap .problem { margin-top: 0; }
+.setting-wrap .dg { height: min(28vh, 290px); }
+.setting-wrap .dcard { padding: 18px 18px 10px; }
