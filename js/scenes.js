@@ -280,7 +280,7 @@ window.Scenes = (() => {
     }
   }
 
-  // each Pick Mug noise flashes once: start time from a fixed hash of its index, a glow, a bright core and a small star
+  // each Pick Mug noise flashes once: start time from a fixed hash of its index, a glow and a brighter dot
   Inference.prototype.drawSparkle = function (N, task) {
     const x = this.ctx, b = this.b, T = this.sparkT, hash = (i) => { const v = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
     x.save();
@@ -293,8 +293,6 @@ window.Scenes = (() => {
       gr.addColorStop(0, "rgba(217,30,91,.55)"); gr.addColorStop(1, "rgba(217,30,91,0)");
       x.globalAlpha = k; x.fillStyle = gr; x.beginPath(); x.arc(X, Y, 11 * b * k + 1, 0, 2 * Math.PI); x.fill();
       x.fillStyle = MUG; x.beginPath(); x.arc(X, Y, (2.6 + 1.6 * k) * b, 0, 2 * Math.PI); x.fill();
-      x.strokeStyle = this.T.bg; x.lineWidth = 1.1 * b; x.globalAlpha = 0.9 * k; const r = 5.5 * b * k;
-      x.beginPath(); x.moveTo(X - r, Y); x.lineTo(X + r, Y); x.moveTo(X, Y - r); x.lineTo(X, Y + r); x.stroke();
     });
     x.restore();
   };
