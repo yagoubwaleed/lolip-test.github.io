@@ -143,24 +143,24 @@ b, strong { font-weight: 600; }
 .wide .fig { max-width: 1180px; }
 
 /* template slides (3-10, 12): title and explanation on top, then one figure at a time; extra figures are builds */
-.slide.tpl { display: flex; flex-direction: column; gap: 0; padding: clamp(26px, 4.5vh, 54px) clamp(96px, 10vw, 200px) clamp(18px, 3vh, 34px); }
+.slide.tpl { display: flex; flex-direction: column; justify-content: center; gap: 0; padding: clamp(32px, 7vh, 84px) clamp(96px, 10vw, 200px); }
 .tpl-head, .tpl-body { width: 100%; max-width: 1120px; margin-left: auto; margin-right: auto; }
 .tpl-head h2 { margin: 0 0 12px; max-width: 28em; }
 .tpl-head .lede { max-width: 50em; margin: 0 0 8px; }
 .tpl-head .lede:last-child { margin-bottom: 0; }
 .tpl-head .eq { margin: 4px 0 0; }
 .tpl-head .eq-small { margin: 6px 0 0; }
-.tpl-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-top: clamp(14px, 2.6vh, 28px); }
-.build { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.tpl-body { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: clamp(18px, 3.4vh, 34px); }
+.build { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .build[hidden] { display: none; }
 .fig-head { display: flex; align-items: center; gap: 14px; min-height: 38px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--hair); }
 .fig-title { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .fig-ctl { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .fig-ctl .seg { margin: 0; }
-.fig-main { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.fig-main { flex: 0 1 auto; height: clamp(200px, calc(100vh - 500px), 380px); min-height: 180px; display: flex; align-items: center; justify-content: center; container-type: size; }
 .chart-host { width: 100%; height: 100%; }
 .chart-host svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.scene-host { width: 100%; max-height: 100%; }
+.scene-host { width: min(100%, 100cqh * 4.15); }                 /* the scenes are about 4.2 : 1 */
 .build .cap { margin-top: 10px; }
 .build .scene-status { margin: 8px 0 0; text-align: center; }
 .tpl-body svg text { fill: var(--ink); }
@@ -180,7 +180,6 @@ b, strong { font-weight: 600; }
 .bnav button[aria-current="true"] i { background: currentColor; }
 .bnav button:hover { background: var(--soft); }
 /* real world: video and curve side by side, same height */
-.fig-main:has(.rw-pair) { container-type: size; }
 .rw-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: min(100%, calc((100cqh - 26px) * 8 / 3 + 40px)); }
 .rw-item { min-width: 0; }
 .rw-label { font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; height: 18px; }
@@ -347,9 +346,9 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 @media (max-width: 960px) {
   .slide.tpl { display: block; overflow-y: auto; padding: 24px 16px 96px; }
   .tpl-body { margin-top: 18px; }
-  .fig-main { min-height: 280px; }
+  .fig-main { height: auto; min-height: 0; container-type: normal; }
+  .scene-host { width: 100%; }
   .chart-host { height: 300px; }
-  .fig-main:has(.rw-pair) { container-type: normal; }
   .rw-pair { grid-template-columns: 1fr; width: 100%; }
   .fig-head { flex-wrap: wrap; }
   :root { --nav-h: 56px; }
