@@ -32,8 +32,9 @@ window.Scenes = (() => {
       this.cv.className = "scene-canvas";
       el.appendChild(this.cv);
       this.ctx = this.cv.getContext("2d");
-      this.X = sc.canvas.xlim;
-      this.Y = [sc.canvas.ylim[0] + 0.05, sc.canvas.ylim[1] - 0.12];
+      // crop to the drawn content (discs, labels, robot panel), not the video's full frame
+      this.X = [1.0, 14.35];
+      this.Y = [-1.62, 1.45];
       this.cv.style.aspectRatio = `${this.X[1] - this.X[0]} / ${this.Y[1] - this.Y[0]}`;
       const F = sc.site_frames;
       this.frames = Array.from({ length: F.n }, (_, k) => {

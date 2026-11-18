@@ -143,25 +143,27 @@ b, strong { font-weight: 600; }
 .wide .fig { max-width: 1180px; }
 
 /* template slides (3-10, 12): title and explanation on top, then one figure at a time; extra figures are builds */
-.slide.tpl { display: flex; flex-direction: column; justify-content: center; gap: 0; padding: clamp(32px, 7vh, 84px) clamp(96px, 10vw, 200px); }
-.tpl-head, .tpl-body { width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; }   /* one centred column: text and figure share its left edge */
+.slide.tpl { display: flex; flex-direction: column; justify-content: center; gap: 0; padding: clamp(40px, 9vh, 100px) clamp(96px, 10vw, 200px); }   /* builds of a slide have one height, so the text never moves */
+.tpl-head, .tpl-body { width: 100%; max-width: 960px; margin-left: auto; margin-right: auto; }   /* one centred column: text and figure share its left edge */
 .tpl-head h2 { margin: 0 0 12px; max-width: 28em; }
 .tpl-head .lede { max-width: 50em; margin: 0 0 8px; }
 .tpl-head .lede:last-child { margin-bottom: 0; }
 .tpl-head .eq { margin: 4px 0 0; }
 .tpl-head .eq-small { margin: 6px 0 0; }
-.tpl-body { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: clamp(18px, 3.4vh, 34px); }
+.tpl-body { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; margin-top: clamp(18px, 3.4vh, 34px); container-type: inline-size; }
 .build { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .build[hidden] { display: none; }
-.fig-head { display: flex; align-items: center; gap: 14px; min-height: 38px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.fig-head { display: flex; align-items: center; gap: 14px; height: 38px; flex: none; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--hair); }
 .fig-title { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .fig-ctl { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .fig-ctl .seg { margin: 0; }
-.fig-main { flex: 0 1 auto; height: clamp(200px, calc(100vh - 500px), 380px); min-height: 180px; display: flex; align-items: center; justify-content: center; container-type: size; }
+/* the frame fits its figure: column width / the slide's figure aspect (--ar, set per slide so both builds share one
+   height), capped on short screens */
+.fig-main { flex: 0 1 auto; height: min(calc(100cqw / var(--ar, 1.6)), clamp(150px, calc(100vh - 520px), 360px)); min-height: 140px; display: flex; align-items: center; justify-content: center; container-type: size; }
 .chart-host { width: 100%; height: 100%; }
 .chart-host svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.scene-host { width: min(100%, 100cqh * 4.15); margin-right: auto; }                 /* the scenes are about 4.2 : 1 */
-.build .cap { margin-top: 10px; }
+.scene-host { width: min(100%, 100cqh * 4.35); }                 /* the cropped scenes are 4.35 : 1 */                 /* the scenes are about 4.2 : 1 */
+.build .cap { margin-top: 10px; min-height: 4.5em; }               /* same height for every build: room for 3 lines */
 .build .scene-status { margin: 8px 0 0; text-align: center; }
 .tpl-body svg text { fill: var(--ink); }
 .tpl-body svg .axis-label { fill: var(--muted); }
@@ -373,3 +375,7 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 /* ------------------------------------------------------------------ line breaks: no single word left on a line */
 h1, h2 { text-wrap: balance; }
 .lede, .points li, .insights .v, .dstep { text-wrap: pretty; }
+
+/* titles: one line on desktop */
+.tpl-head h2, .insights h2 { white-space: nowrap; font-size: clamp(22px, 2.2vw, 30px); max-width: none; }
+@media (max-width: 960px) { .tpl-head h2, .insights h2 { white-space: normal; } }
