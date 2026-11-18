@@ -148,10 +148,10 @@ window.Scenes = (() => {
         x.beginPath(); x.moveTo(B[0], B[1]); x.lineTo(B[0] - hl, B[1] - 3.2 * b); x.lineTo(B[0] - hl, B[1] + 3.2 * b); x.closePath(); x.fill(); x.restore();
         this.text("Roll out", [(ra.from[0] + ra.to[0]) / 2, ra.from[1]], { size: 10.5, color: this.T.muted, alpha: a, mono: true, base: "bottom", dy: -8 });
         const X0 = this.px(R.x0), Y0 = this.py(R.y0 + R.size), sz = R.size * this.u, im = this.frames[Math.max(0, Math.min(this.frames.length - 1, frame))];
-        x.save(); x.globalAlpha = a; x.beginPath(); x.roundRect(X0, Y0, sz, sz, 10 * b); x.clip();
+        x.save(); x.globalAlpha = a; x.beginPath(); x.roundRect(X0, Y0, sz, sz, 8); x.clip();
         if (im.complete && im.naturalWidth) x.drawImage(im, X0, Y0, sz, sz); else { x.fillStyle = this.T.disc; x.fillRect(X0, Y0, sz, sz); }
         x.restore();
-        x.save(); x.globalAlpha = a; x.strokeStyle = this.T.hair; x.lineWidth = 1 * b; x.beginPath(); x.roundRect(X0, Y0, sz, sz, 10 * b); x.stroke(); x.restore();
+        x.save(); x.globalAlpha = a; x.strokeStyle = this.T.hair; x.lineWidth = 1 * b; x.beginPath(); x.roundRect(X0, Y0, sz, sz, 8); x.stroke(); x.restore();
         this.text("Goal · pick up mug", [R.x0 + R.size / 2, R.y0 + R.size], { size: 10.5, color: this.T.muted, alpha: a, mono: true, base: "bottom", dy: -8 });
       }
       if (aEnd > 0) {

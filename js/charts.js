@@ -130,8 +130,8 @@ window.SLIDES = {};
   }
 
   // ------------------------------------------------------------ grouped bars, Vanilla vs LoLip
-  function barChart(el, { groups, yMax = 1, yTicks, fmt = pct, H = 380, labels = false, ratio = false, rotate = false, sepBeforeLast = false }) {
-    const W = 680, m = { l: 46, r: 8, t: 26, b: rotate ? 92 : 48 };
+  function barChart(el, { groups, W = 680, maxBar = 44, yMax = 1, yTicks, fmt = pct, H = 380, labels = false, ratio = false, rotate = false, sepBeforeLast = false }) {
+    const m = { l: 46, r: 8, t: 26, b: rotate ? 92 : 48 };
     const svg = svgEl(el, W, H);
     hatch(svg, `h${el.id}`, C.greyLine);
     const x = d3.scaleBand().domain(groups.map((g) => g.name)).range([m.l, W - m.r]).paddingInner(.28).paddingOuter(.12);
@@ -145,15 +145,16 @@ window.SLIDES = {};
       const xs = x(groups.at(-1).name) - x.step() * x.paddingInner() / 2;
       g.append("line").attr("x1", xs).attr("x2", xs).attr("y1", m.t - 10).attr("y2", H - m.b).style("stroke", "var(--axis)");
     }
-    const bw = x.bandwidth() / 2;
+    const bw = Math.min(x.bandwidth() / 2, maxBar), off = (x.bandwidth() - 2 * bw) / 2;   // capped bar width, pair centred in its band
+    const bx = (d) => x(d.gr.name) + off + d.j * bw;
     const items = groups.flatMap((gr, gi) => ["vanilla", "lolip"].map((k, j) => ({ gr, gi, k, j, v: gr[k].mean, sd: gr[k].sd })));
     const bars = svg.append("g").selectAll("g").data(items).join("g");
-    const rects = bars.append("rect").attr("x", (d) => x(d.gr.name) + d.j * bw + 1.5).attr("width", bw - 3).attr("rx", 3)
+    const rects = bars.append("rect").attr("x", (d) => bx(d) + 1.5).attr("width", bw - 3)
       .style("fill", (d) => (d.k === "lolip" ? C.pinkFill : `url(#h${el.id})`)).style("stroke", (d) => (d.k === "lolip" ? C.pink : "var(--bar-edge)")).attr("stroke-width", 1.5)
       .attr("y", y(0)).attr("height", 0);
     const errs = bars.filter((d) => d.sd != null).append("path").style("stroke", C.ink).attr("stroke-width", 1.1).style("fill", "none").attr("opacity", 0)
-      .attr("d", (d) => { const cx = x(d.gr.name) + d.j * bw + bw / 2, a = y(clamp(d.v - d.sd, 0, yMax)), b = y(Math.min(d.v + d.sd, yMax)); return `M${cx},${a}V${b}M${cx - 4},${a}H${cx + 4}M${cx - 4},${b}H${cx + 4}`; });
-    const vals = labels ? bars.append("text").attr("x", (d) => x(d.gr.name) + d.j * bw + bw / 2).attr("text-anchor", "middle").attr("font-size", 14).attr("font-weight", (d) => (d.k === "lolip" ? 600 : 450))
+      .attr("d", (d) => { const cx = bx(d) + bw / 2, a = y(clamp(d.v - d.sd, 0, yMax)), b = y(Math.min(d.v + d.sd, yMax)); return `M${cx},${a}V${b}M${cx - 4},${a}H${cx + 4}M${cx - 4},${b}H${cx + 4}`; });
+    const vals = labels ? bars.append("text").attr("x", (d) => bx(d) + bw / 2).attr("text-anchor", "middle").attr("font-size", 14).attr("font-weight", (d) => (d.k === "lolip" ? 600 : 450))
       .style("fill", (d) => (d.k === "lolip" ? C.pink : C.greyLine)).attr("opacity", 0) : null;
     const ratios = ratio ? svg.append("g").selectAll("text").data(groups).join("text").attr("x", (d) => x(d.name) + x.bandwidth() / 2).attr("y", (d) => y(Math.max(d.vanilla.mean, d.lolip.mean)) - 14)
       .attr("text-anchor", "middle").attr("font-size", 15).attr("font-weight", 600).style("fill", C.pink).attr("opacity", 0).text((d) => `×${(d.lolip.mean / d.vanilla.mean).toFixed(2)}`) : null;
@@ -772,7 +773,7 @@ window.SLIDES = {};
   SLIDES.cost = {
     async init() {
       const d = await load("libero90");
-      bC = barChart(document.getElementById("barsCost"), { groups: d.groups, yMax: 1.06, yTicks: [0, .25, .5, .75, 1], labels: true });
+      bC = barChart(document.getElementById("barsCost"), { groups: d.groups, W: 440, yMax: 1.06, yTicks: [0, .25, .5, .75, 1], labels: true });
     },
     async enter() { await load("libero90"); },
     build() { bC.play(); },
