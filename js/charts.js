@@ -607,8 +607,6 @@ window.SLIDES = {};
       const d = (await load("singular_values")).forward;
       hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
       hF.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
-      document.getElementById("contrMed").textContent = d.vanilla.median.toFixed(4);
-      document.getElementById("contrX").textContent = Math.round(1 / d.vanilla.median);
     },
     async enter() { await load("singular_values"); },
     build(k) { if (k === 0) wContr.run(); else { wContr.stop(); hF.play(); } },
