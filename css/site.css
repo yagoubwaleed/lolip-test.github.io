@@ -180,7 +180,7 @@ b, strong { font-weight: 600; }
 .bnav button[aria-current="true"] i { background: currentColor; }
 .bnav button:hover { background: var(--soft); }
 /* real world: video and curve side by side, same height */
-.rw-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: min(100%, calc((100cqh - 26px) * 8 / 3 + 40px)); }
+.rw-pair { display: grid; grid-template-columns: .85fr 1fr; align-items: center; gap: 40px; width: min(100%, calc((100cqh - 26px) * 4 / 3 * 1.85 + 40px)); }   /* video 15% smaller than the curve */
 .rw-item { min-width: 0; }
 .rw-label { font-family: "Geist Mono", monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; height: 18px; }
 .rw-pair .rw-vid, .rw-pair .rw-chart { width: 100%; aspect-ratio: 4 / 3; }
