@@ -415,7 +415,7 @@ window.SLIDES = {};
   }
   // action spread: plays on its own, with replay and an optional Vanilla / LoLip switch
   function spreadWidget(hostId, initial) {
-    const host = document.getElementById(hostId), bar = host.parentElement.querySelector(".scene-bar");
+    const host = document.getElementById(hostId), bar = host.closest(".fig").querySelector(".scene-bar");
     const get = scenePool(host, "spread");
     let p = initial, cur = null;
     const run = async () => { cur = await get(p); cur.t = 0; cur.play(0, cur.end, cur.sc.clock.speedup); };
@@ -426,8 +426,8 @@ window.SLIDES = {};
   }
   // noise policy demo: (1) invert the demonstrations and fit the noise policy, (2) sample from it for "pick the mug"
   function inferenceWidget(hostId, initial) {
-    const host = document.getElementById(hostId), bar = host.parentElement.querySelector(".scene-bar");
-    const bL = bar.querySelector("[data-learn]"), bI = bar.querySelector("[data-infer]"), st = bar.querySelector("[data-status]");
+    const host = document.getElementById(hostId), fig = host.closest(".fig"), bar = fig.querySelector(".scene-bar");
+    const bL = bar.querySelector("[data-learn]"), bI = bar.querySelector("[data-infer]"), st = fig.querySelector("[data-status]");
     const get = scenePool(host, "inference");
     let p = initial, cur = null, timers = [];
     const later = (sec, fn) => timers.push(setTimeout(fn, (sec * 1000) / cur.sc.clock.speedup));
@@ -469,6 +469,9 @@ window.SLIDES = {};
     capEl.textContent = caps.scene;
     seg(document.getElementById(segId), (v) => {
       for (const k in panes) document.getElementById(panes[k]).hidden = k !== v;
+      capEl.closest(".fig").querySelector(".scene-bar").classList.toggle("alt", v !== "scene");
+      const st = capEl.closest(".fig").querySelector("[data-status]");
+      if (st) st.hidden = v !== "scene";
       capEl.textContent = caps[v];
       onShow(v);
     });

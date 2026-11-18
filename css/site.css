@@ -174,8 +174,12 @@ h2 b { font-weight: 600; }
 
 /* contraction scenes */
 .scene-canvas { display: block; width: 100%; }
-.scene-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.scene-bar .seg { margin: 0 0 0 auto; }
+.scene-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.scene-bar .ctl { display: flex; align-items: center; gap: 8px; }
+.scene-bar .seg { margin: 0; }
+.scene-bar .seg.view { margin-left: auto; }
+.scene-bar.alt .ctl { visibility: hidden; }
+.alt-chart { max-width: 620px; margin: 0 auto; }
 .sbtn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer;
   color: var(--ink); border: 1px solid var(--hair); background: var(--surface); transition: all .3s var(--ease-out); }
 .sbtn:hover:not([disabled]) { border-color: var(--ink); }
@@ -183,7 +187,7 @@ h2 b { font-weight: 600; }
 .sbtn.solid:hover:not([disabled]) { background: var(--pink); border-color: var(--pink); color: #fff; }
 .sbtn[disabled] { opacity: .35; cursor: default; }
 .sbtn .k { font-family: "Geist Mono", monospace; font-size: 11px; opacity: .6; }
-.scene-status { font-size: 13px; color: var(--muted); min-height: 1.4em; }
+.scene-status { font-size: 13.5px; color: var(--ink-2); min-height: 1.5em; margin: 10px 0 0; }
 
 /* arrows */
 .arrow {

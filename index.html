@@ -84,10 +84,12 @@
       </div>
     </div>
     <div class="fig" data-a style="--d:3">
-      <div class="seg" id="segContr"><span class="knob"></span><button aria-pressed="true" data-v="scene">Action spread</button><button aria-pressed="false" data-v="hist">Singular values</button></div>
-      <div id="contrScenePane"><div id="sceneSpreadV"></div>
-        <div class="scene-bar"><button class="sbtn" data-replay>↺ Replay</button></div></div>
-      <div id="contrHistPane" hidden><div id="histForward" style="max-width:620px;margin:0 auto"></div></div>
+      <div id="contrScenePane"><div id="sceneSpreadV"></div></div>
+      <div id="contrHistPane" hidden><div id="histForward" class="alt-chart"></div></div>
+      <div class="scene-bar">
+        <span class="ctl"><button class="sbtn" data-replay>↺ Replay</button></span>
+        <div class="seg view" id="segContr"><span class="knob"></span><button aria-pressed="true" data-v="scene">Action spread</button><button aria-pressed="false" data-v="hist">Singular values</button></div>
+      </div>
       <div class="cap" id="contrCap"></div>
     </div>
   </section>
@@ -102,10 +104,13 @@
       </div>
     </div>
     <div class="fig" data-a style="--d:3">
-      <div class="seg" id="segExp"><span class="knob"></span><button aria-pressed="true" data-v="scene">Noise policy</button><button aria-pressed="false" data-v="hist">Singular values</button></div>
-      <div id="expScenePane"><div id="sceneInfV"></div>
-        <div class="scene-bar"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button><span class="scene-status" data-status></span></div></div>
-      <div id="expHistPane" hidden><div id="expHist" style="max-width:620px;margin:0 auto"></div></div>
+      <div id="expScenePane"><div id="sceneInfV"></div></div>
+      <div id="expHistPane" hidden><div id="expHist" class="alt-chart"></div></div>
+      <div class="scene-bar">
+        <span class="ctl"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button></span>
+        <div class="seg view" id="segExp"><span class="knob"></span><button aria-pressed="true" data-v="scene">Noise policy</button><button aria-pressed="false" data-v="hist">Singular values</button></div>
+      </div>
+      <p class="scene-status" data-status></p>
       <div class="cap" id="expCap"></div>
     </div>
   </section>
@@ -138,11 +143,13 @@
       </div>
     </div>
     <div class="fig" data-a style="--d:3">
-      <div class="seg" id="segSpread"><span class="knob"></span><button aria-pressed="true" data-v="scene">Action spread</button><button aria-pressed="false" data-v="bars">LIBERO-Goal</button></div>
-      <div id="spreadScenePane"><div id="sceneSpreadL"></div>
-        <div class="scene-bar"><button class="sbtn" data-replay>↺ Replay</button>
-          <div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></div></div>
-      <div id="spreadBarsPane" hidden><div id="barsSpread" style="max-width:620px;margin:0 auto"></div></div>
+      <div id="spreadScenePane"><div id="sceneSpreadL"></div></div>
+      <div id="spreadBarsPane" hidden><div id="barsSpread" class="alt-chart"></div></div>
+      <div class="scene-bar">
+        <span class="ctl"><button class="sbtn" data-replay>↺ Replay</button>
+          <div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span>
+        <div class="seg view" id="segSpread"><span class="knob"></span><button aria-pressed="true" data-v="scene">Action spread</button><button aria-pressed="false" data-v="bars">LIBERO-Goal</button></div>
+      </div>
       <div class="cap" id="spreadCap"></div>
     </div>
   </section>
@@ -157,8 +164,11 @@
     </div>
     <div class="fig" data-a style="--d:3">
       <div id="sceneInfL"></div>
-      <div class="scene-bar"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button><span class="scene-status" data-status></span>
-        <div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></div>
+      <div class="scene-bar">
+        <span class="ctl"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button></span>
+        <div class="seg pink view" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div>
+      </div>
+      <p class="scene-status" data-status></p>
       <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
     </div>
   </section>
