@@ -190,7 +190,7 @@ h2 b { font-weight: 600; }
 .vid .res { position: absolute; right: 10px; bottom: 10px; font-size: 12px; padding: 5px 10px; border-radius: 999px; background: rgba(14,14,16,.78); color: #fff; }
 
 .rw { display: grid; grid-template-columns: 1fr; gap: 14px; width: min(100%, calc((100vh - 220px) / 1.15)); justify-self: center; }
-.rw-vid { border-radius: 18px; overflow: hidden; background: var(--soft); }
+.rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); }
 .rw-vid video { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
