@@ -235,6 +235,20 @@ h2 b { font-weight: 600; }
 .diagrams { display: grid; max-width: 1000px; margin: 0 auto; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 48px); align-items: start; }
 .dcard { border: 1px solid var(--hair); border-radius: 22px; padding: 22px 22px 14px; background: var(--surface); transition: border-color .4s, box-shadow .4s, transform .5s var(--ease-out); }
 .dcard:hover { border-color: var(--axis); box-shadow: 0 18px 50px -24px rgba(0,0,0,.18); transform: translateY(-3px); }
+.dcard { position: relative; }
+.dplay { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 11px; border-radius: 999px;
+  border: 1px solid var(--hair); background: var(--surface); color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; transition: all .3s var(--ease-out); }
+.dplay:hover, .dplay.on { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.dstep { min-height: 5.9em; margin: 6px 2px 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); transition: opacity .22s; }
+.dstep.hint { color: var(--muted); }
+.dstep .n { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--muted); margin-right: 9px; }
+.dg [data-s] { transition: opacity .5s var(--ease-out); }
+.dg.playing [data-s] { opacity: .13; }
+.dg.playing [data-s].past { opacity: .4; }
+.dg.playing [data-s].lit { opacity: 1; }
+.dg .bx { transition: stroke-width .4s; }
+.dg.playing .lit .bx { stroke-width: 3.4; }
+.dg .pulse { pointer-events: none; }
 .dcard h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
 .dcard h3 span { font-weight: 400; color: var(--ink-2); }
 .dcard .ref { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
@@ -244,7 +258,7 @@ h2 b { font-weight: 600; }
 .slide.active .dg .d-in { opacity: 1; transition-delay: calc(.6s + var(--i) * .16s); }
 .slide.active .dg .d-draw { stroke-dashoffset: 0; transition-delay: calc(.6s + var(--i) * .16s); }
 .full h2 { font-size: clamp(24px, 2.3vw, 36px); }
-.dg { height: min(36vh, 360px); width: 100%; }
+.dg { height: min(33vh, 340px); width: 100%; }
 .problem { grid-column: 1 / -1; text-align: center; font-size: clamp(19px, 1.8vw, 26px); letter-spacing: -.03em; margin-top: 8px; }
 
 .eq { font-size: clamp(14px, 1.4vw, 22px); margin: 6px 0 4px; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
@@ -277,7 +291,7 @@ h2 b { font-weight: 600; }
 .katex-display > .katex { text-align: left; }
 @media (max-height: 820px) and (min-width: 961px) {
   h2 { font-size: clamp(24px, 2.4vw, 36px); }
-  .dg { height: 33vh; }
+  .dg { height: 29vh; }
   .lede { font-size: 15px; }
 }
 @media (max-width: 960px) {

@@ -274,8 +274,11 @@ window.SLIDES = {};
   const SUB = (s) => `<tspan baseline-shift="sub" font-size=".68em">${s}</tspan>`;
   const SUP = (s) => `<tspan dx="2" baseline-shift="super" font-size=".62em">${s}</tspan>`;
   function box(x0, x1, y, BH, name, pink, i) {
-    return `<g class="d-in" style="--i:${i}"><rect x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${pink ? "var(--box-pink)" : "var(--box)"};stroke:${pink ? "var(--box-pink-edge)" : C.ink}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${name}</text></g>`;
+    return `<g class="d-in" style="--i:${i}"><rect class="bx" x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${pink ? "var(--box-pink)" : "var(--box)"};stroke:${pink ? "var(--box-pink-edge)" : C.ink}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${name}</text></g>`;
   }
+  // step groups for the walk-through: G(steps, html, pulse) wraps a piece of the diagram; `steps` lists the steps that
+  // light it up, `pulse` ("k.n") marks an arrow a dot travels along in step k (n-th in that step)
+  const G = (steps, html, pulse) => `<g data-s="${steps}"${pulse ? ` data-p="${pulse}"` : ""}>${html}</g>`;
   function dsbcSVG() {
     const BX0 = 50, BX1 = 290, GX = 400, Y0 = 36, P = 100, BH = 54, GW = 130, W = 520, H = Y0 + 4 * P + 36, cx = (BX0 + BX1) / 2;
     const st = [["Demos", it("a") + SUB(it("D")), [[0.42, -0.45, 0.17], [1.0, 0.18, 0.2]], "var(--grey-line)"],
@@ -285,15 +288,15 @@ window.SLIDES = {};
                 ["Environment", it("s′"), null, null]];
     let p = "";
     st.forEach(([name, out, comps, col], k) => {
-      const y = Y0 + k * P, i = 2 * k;
-      p += box(BX0, BX1, y, BH, name, k === 2, i);
-      if (k + 1 < st.length) p += arrowD([[cx, y + BH / 2 + 3], [cx, y + P - BH / 2 - 3]], C.ink, i + 1);
-      p += arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1);
-      p += comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
-                 : `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX - GW / 2 + 4}" y="${y}">${out}</text>`;
+      const y = Y0 + k * P, i = 2 * k, step = k + 1;
+      p += G(step, box(BX0, BX1, y, BH, name, k === 2, i));
+      if (k + 1 < st.length) p += G(step + 1, arrowD([[cx, y + BH / 2 + 3], [cx, y + P - BH / 2 - 3]], C.ink, i + 1), `${step + 1}.1`);
+      p += G(step, arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1), `${step}.3`);
+      p += G(step, comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
+                         : `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX - GW / 2 + 4}" y="${y}">${out}</text>`);
     });
     const y2 = Y0 + 2 * P;
-    p += `<text class="d-in" style="--i:4" x="${BX0 - 34}" y="${y2}">${it("s")}</text>` + arrowD([[BX0 - 22, y2], [BX0 - 3, y2]], C.ink, 4);
+    p += G(3, `<text class="d-in" style="--i:4" x="${BX0 - 34}" y="${y2}">${it("s")}</text>` + arrowD([[BX0 - 22, y2], [BX0 - 3, y2]], C.ink, 4), "3.2");
     return `<svg class="dg" viewBox="-6 0 ${W + 18} ${H}">${p}</svg>`;
   }
   function dsrlSVG() {
@@ -301,21 +304,94 @@ window.SLIDES = {};
     const st = [["Noise policy " + it("π") + SUP(it("W")), it("w"), [[1, 0, 0.12]], "var(--box-pink-edge)"],
                 ["Flow policy " + it("π") + SUB("dp"), it("a"), [[0.45, -0.4, 0.13], [1.0, 0.25, 0.15]], "var(--grey-line)"],
                 ["Environment", it("s′"), null, null]];
-    let p = `<rect class="d-in" style="--i:3;fill:none;stroke:var(--frame)" x="${BX0 - 14}" y="${YS[1] - BH / 2 - 14}" width="${BX1 - BX0 + 28}" height="${YS[2] - YS[1] + BH + 50}" rx="14" stroke-width="1.6"/>` +
-            `<text class="d-in" style="--i:3;font-size:19px;fill:${C.muted}" x="${cx}" y="${YS[2] + BH / 2 + 19}">Latent-action environment</text>`;
-    p += `<text class="d-in" style="--i:0" x="${cx}" y="${YS[0] - BH / 2 - 52}">${it("s")}</text>` + arrowD([[cx, YS[0] - BH / 2 - 36], [cx, YS[0] - BH / 2 - 3]], C.ink, 0);
+    let p = G("4", `<rect class="d-in" style="--i:3;fill:none;stroke:var(--frame)" x="${BX0 - 14}" y="${YS[1] - BH / 2 - 14}" width="${BX1 - BX0 + 28}" height="${YS[2] - YS[1] + BH + 50}" rx="14" stroke-width="1.6"/>` +
+            `<text class="d-in" style="--i:3;font-size:19px;fill:${C.muted}" x="${cx}" y="${YS[2] + BH / 2 + 19}">Latent-action environment</text>`);
+    p += G(1, `<text class="d-in" style="--i:0" x="${cx}" y="${YS[0] - BH / 2 - 52}">${it("s")}</text>` + arrowD([[cx, YS[0] - BH / 2 - 36], [cx, YS[0] - BH / 2 - 3]], C.ink, 0), "1.1");
     st.forEach(([name, out, comps, col], k) => {
-      const y = YS[k], i = 1 + 2 * k;
-      p += box(BX0, BX1, y, BH, name, k === 0, i);
-      if (k + 1 < st.length) p += arrowD([[cx, y + BH / 2 + 3], [cx, YS[k + 1] - BH / 2 - 3]], C.ink, i + 1);
-      p += arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1);
-      p += comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
-                 : `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX - GW / 2 + 4}" y="${y}">${out}</text>`;
+      const y = YS[k], i = 1 + 2 * k, step = k + 2;
+      p += G(step, box(BX0, BX1, y, BH, name, k === 0, i));
+      if (k + 1 < st.length) p += G(step + 1, arrowD([[cx, y + BH / 2 + 3], [cx, YS[k + 1] - BH / 2 - 3]], C.ink, i + 1), `${step + 1}.1`);
+      p += G(step, arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1), `${step}.2`);
+      p += G(step, comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
+                         : `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX - GW / 2 + 4}" y="${y}">${out}</text>`);
     });
     const sx = GX - GW / 2 + 16;
-    p += arrowD([[sx, YS[2] + 22], [sx, LY], [LX, LY], [LX, YS[0]], [BX0 - 3, YS[0]]], "var(--box-pink-edge)", 7, true) +
-         `<text class="d-in" style="--i:7;font-size:21px;fill:var(--box-pink-edge);paint-order:stroke;stroke:var(--bg)" stroke-width="10" x="${(sx + LX) / 2 + 60}" y="${LY}">RL training</text>`;
+    p += G(5, arrowD([[sx, YS[2] + 22], [sx, LY], [LX, LY], [LX, YS[0]], [BX0 - 3, YS[0]]], "var(--box-pink-edge)", 7, true) +
+         `<text class="d-in" style="--i:7;font-size:21px;fill:var(--box-pink-edge);paint-order:stroke;stroke:var(--bg)" stroke-width="10" x="${(sx + LX) / 2 + 60}" y="${LY}">RL training</text>`, "5.1");
     return `<svg class="dg" viewBox="0 0 ${W} ${H}">${p}</svg>`;
+  }
+  const DSRL_STEPS = [
+    "The robot observes its state <i>s</i>.",
+    "The noise policy <i>π</i><sup>W</sup>, the only part that is trained, picks a noise <i>w</i> for this state.",
+    "The pretrained flow policy <i>π</i><sub>dp</sub> is frozen. It turns the noise <i>w</i> into an action <i>a</i>.",
+    "The robot executes <i>a</i>, and the environment returns the next state <i>s′</i> and a reward. To the noise policy, the frozen flow policy and the environment together form a latent-action environment: its actions are noises.",
+    "RL updates only the noise policy, from the reward, so it learns which noises lead to success. The flow policy's weights never change.",
+  ];
+  const DSBC_STEPS = [
+    "Start from demonstrations of the new task, with actions <i>a</i><sub>D</sub>.",
+    "Run the frozen flow backwards (<i>f</i><sup>−1</sup>): each demonstrated action is mapped to the noise <i>w</i><sub>D</sub> that produces it.",
+    "Train the noise policy <i>π</i><sub>θ</sub>, the only part that is trained, by supervised learning: given the state <i>s</i>, predict these noises. It outputs a noise <i>w′</i>.",
+    "At test time, the noise <i>w′</i> goes forward through the frozen flow <i>f</i> and gives an action <i>a</i>.",
+    "The robot executes <i>a</i> in the environment. The flow policy's weights never change.",
+  ];
+  // play button: dims the diagram, then lights each step's pieces in order, draws its arrows, runs a dot along them,
+  // and shows the step's sentence below the diagram; at the end everything is lit again
+  function walkthrough(card, steps) {
+    const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay");
+    const STEP = 3.4, hint = cap.innerHTML;
+    let timers = [], rafs = [];
+    const later = (sec, fn) => timers.push(setTimeout(fn, sec * 1000));
+    const caption = (html) => { cap.style.opacity = 0; later(0.22, () => { cap.innerHTML = html; cap.classList.remove("hint"); cap.style.opacity = 1; }); };
+    function pulse(poly, color, dur) {
+      const pts = poly.getAttribute("points").trim().split(/\s+/).map((q) => q.split(",").map(Number));
+      const seg = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1])), total = d3.sum(seg);
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("r", 6.5); dot.setAttribute("class", "pulse"); dot.style.fill = color;
+      svg.appendChild(dot);
+      let t0 = null;
+      const step = (now) => {
+        t0 ??= now;
+        const f = Math.min(1, (now - t0) / (dur * 1000)), e = f < 0.5 ? 2 * f * f : 1 - (-2 * f + 2) ** 2 / 2;
+        let d = e * total, i = 0;
+        while (i < seg.length - 1 && d > seg[i]) d -= seg[i++];
+        const u = seg[i] ? d / seg[i] : 0;
+        dot.setAttribute("cx", pts[i][0] + (pts[i + 1][0] - pts[i][0]) * u); dot.setAttribute("cy", pts[i][1] + (pts[i + 1][1] - pts[i][1]) * u);
+        dot.style.opacity = f < 0.1 ? f / 0.1 : f > 0.85 ? (1 - f) / 0.15 : 1;
+        if (f < 1) rafs.push(requestAnimationFrame(step)); else dot.remove();
+      };
+      rafs.push(requestAnimationFrame(step));
+    }
+    function light(k) {
+      svg.querySelectorAll("[data-s]").forEach((g) => {
+        const ss = g.dataset.s.split(" ").map(Number);
+        g.classList.toggle("lit", ss.includes(k));
+        g.classList.toggle("past", !ss.includes(k) && ss.some((x) => x < k));
+      });
+      svg.querySelectorAll(`[data-s~="${k}"] .d-draw`).forEach((el) => {      // redraw this step's arrows and curves
+        el.style.transition = "none"; el.style.strokeDashoffset = 1; el.getBoundingClientRect();
+        el.style.transition = "stroke-dashoffset .7s cubic-bezier(.16,1,.3,1)"; el.style.strokeDashoffset = 0;
+      });
+      [...svg.querySelectorAll(`[data-p^="${k}."]`)].sort((a, b) => a.dataset.p.localeCompare(b.dataset.p))
+        .forEach((g, n) => later(0.15 + n * 0.75, () => pulse(g.querySelector("polyline"), k === 5 && g.querySelector("[stroke-dasharray]") ? "var(--box-pink-edge)" : "var(--ink)", 0.75)));
+      caption(`<span class="n">${k} / ${steps.length}</span>${steps[k - 1]}`);
+    }
+    function reset(keepCaption) {
+      timers.forEach(clearTimeout); rafs.forEach(cancelAnimationFrame); timers = []; rafs = [];
+      svg.querySelectorAll(".pulse").forEach((d) => d.remove());
+      svg.classList.remove("playing");
+      svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past"));
+      svg.querySelectorAll(".d-draw").forEach((el) => { el.style.transition = ""; el.style.strokeDashoffset = ""; });
+      btn.classList.remove("on");
+      if (!keepCaption) { cap.innerHTML = hint; cap.classList.add("hint"); cap.style.opacity = 1; }
+    }
+    btn.addEventListener("click", () => {
+      reset(true);
+      btn.classList.add("on");
+      svg.classList.add("playing");
+      steps.forEach((_, i) => later(0.35 + i * STEP, () => light(i + 1)));
+      later(0.35 + steps.length * STEP, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); btn.classList.remove("on"); });
+    });
+    return { reset: () => reset(false) };
   }
 
   // ------------------------------------------------------------ intro: rotating 3D noise space, narrated
@@ -434,8 +510,14 @@ window.SLIDES = {};
     leave() { cloud?.stop(); },
   };
 
+  let wDSRL, wDSBC;
   SLIDES.setting = {
-    init() { document.getElementById("dgDSRL").innerHTML = dsrlSVG(); document.getElementById("dgDSBC").innerHTML = dsbcSVG(); },
+    init() {
+      document.getElementById("dgDSRL").innerHTML = dsrlSVG(); document.getElementById("dgDSBC").innerHTML = dsbcSVG();
+      wDSRL = walkthrough(document.getElementById("dgDSRL").closest(".dcard"), DSRL_STEPS);
+      wDSBC = walkthrough(document.getElementById("dgDSBC").closest(".dcard"), DSBC_STEPS);
+    },
+    leave() { wDSRL.reset(); wDSBC.reset(); },
   };
 
   const fwdReadout = (v, ss) => ss.map((s) => `<span class="mono">${pct(s.below)}</span> of singular values are below <span class="mono">${d3.format(".1~e")(v)}</span><br>(a change in the noise scaled down more than <span class="mono">${fmtX(1 / v)}</span>)`).join("<br>");
