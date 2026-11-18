@@ -322,26 +322,26 @@ window.SLIDES = {};
   }
   const DSRL_STEPS = [
     "The robot observes its state <i>s</i>.",
-    "The noise policy <i>π</i><sup>W</sup>, the only part that is trained, picks a noise <i>w</i> for this state.",
-    "The pretrained flow policy <i>π</i><sub>dp</sub> is frozen. It turns the noise <i>w</i> into an action <i>a</i>.",
-    "The robot executes <i>a</i>, and the environment returns the next state <i>s′</i> and a reward. To the noise policy, the frozen flow policy and the environment together form a latent-action environment: its actions are noises.",
-    "RL updates only the noise policy, from the reward, so it learns which noises lead to success. The flow policy's weights never change.",
+    "The trained noise policy picks a noise <i>w</i>.",
+    "The frozen flow policy turns <i>w</i> into an action <i>a</i>.",
+    "The robot acts; the environment returns <i>s′</i> and a reward.",
+    "RL updates only the noise policy, from the reward.",
   ];
   const DSBC_STEPS = [
-    "Start from demonstrations of the new task, with actions <i>a</i><sub>D</sub>.",
-    "Run the frozen flow backwards (<i>f</i><sup>−1</sup>): each demonstrated action is mapped to the noise <i>w</i><sub>D</sub> that produces it.",
-    "Train the noise policy <i>π</i><sub>θ</sub>, the only part that is trained, by supervised learning: given the state <i>s</i>, predict these noises. It outputs a noise <i>w′</i>.",
-    "At test time, the noise <i>w′</i> goes forward through the frozen flow <i>f</i> and gives an action <i>a</i>.",
-    "The robot executes <i>a</i> in the environment. The flow policy's weights never change.",
+    "Start from demonstrations, with actions <i>a</i><sub>D</sub>.",
+    "Invert the frozen flow: each action gives its noise <i>w</i><sub>D</sub>.",
+    "Train the noise policy to predict <i>w</i><sub>D</sub> from <i>s</i>.",
+    "At test time, its noise <i>w′</i> runs through the flow to <i>a</i>.",
+    "The robot acts; the flow's weights never change.",
   ];
   // play button: dims the diagram, then lights each step's pieces in order, draws its arrows, runs a dot along them,
   // and shows the step's sentence below the diagram; at the end everything is lit again
   function walkthrough(card, steps) {
     const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay");
-    const STEP = 3.4, hint = cap.innerHTML;
+    const STEP = 2.8;
     let timers = [], rafs = [];
     const later = (sec, fn) => timers.push(setTimeout(fn, sec * 1000));
-    const caption = (html) => { cap.style.opacity = 0; later(0.22, () => { cap.innerHTML = html; cap.classList.remove("hint"); cap.style.opacity = 1; }); };
+    const caption = (html) => { cap.style.opacity = 0; later(0.22, () => { cap.innerHTML = html; cap.style.opacity = 1; }); };
     function pulse(poly, color, dur) {
       const pts = poly.getAttribute("points").trim().split(/\s+/).map((q) => q.split(",").map(Number));
       const seg = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1])), total = d3.sum(seg);
@@ -382,14 +382,14 @@ window.SLIDES = {};
       svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past"));
       svg.querySelectorAll(".d-draw").forEach((el) => { el.style.transition = ""; el.style.strokeDashoffset = ""; });
       btn.classList.remove("on");
-      if (!keepCaption) { cap.innerHTML = hint; cap.classList.add("hint"); cap.style.opacity = 1; }
+      if (!keepCaption) { cap.innerHTML = ""; cap.style.opacity = 1; }
     }
     btn.addEventListener("click", () => {
       reset(true);
       btn.classList.add("on");
       svg.classList.add("playing");
       steps.forEach((_, i) => later(0.35 + i * STEP, () => light(i + 1)));
-      later(0.35 + steps.length * STEP, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); btn.classList.remove("on"); });
+      later(0.35 + steps.length * STEP, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); btn.classList.remove("on"); cap.style.opacity = 0; });
     });
     return { reset: () => reset(false) };
   }

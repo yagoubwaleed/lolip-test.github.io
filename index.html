@@ -66,14 +66,14 @@
           <h3>DSRL <span>· noise steering via RL</span></h3>
           <div class="ref">Wagenmaker et al., 2025</div>
           <div id="dgDSRL"></div>
-          <p class="dstep hint">Press play to walk through the method, one step at a time.</p>
+          <p class="dstep" aria-live="polite"></p>
         </div>
         <div class="dcard" data-a style="--d:3">
           <button class="dplay" aria-label="Play the walk-through"><svg viewBox="0 0 12 12" width="10" height="10"><path d="M2.5 1.2v9.6L10.5 6z" fill="currentColor"/></svg>Play</button>
           <h3>DSBC <span>· noise steering via inverted demos</span></h3>
           <div class="ref">Tang et al., 2026</div>
           <div id="dgDSBC"></div>
-          <p class="dstep hint">Press play to walk through the method, one step at a time.</p>
+          <p class="dstep" aria-live="polite"></p>
         </div>
         <p class="problem" data-a style="--d:5"><b>Problem:</b> both work <span class="pk">inefficiently</span>.</p>
       </div>
@@ -207,19 +207,17 @@
   </section>
 
   <!-- 10 -->
-  <section class="slide wide" id="real" data-title="Real World">
-    <div class="head">
+  <section class="slide" id="real" data-title="Real World">
+    <div>
       <h2 data-a style="--d:1">Result: LoLip learns real-world RL tasks <b>in under 100 episodes</b>.</h2>
-      <div>
-        <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
-        <p class="lede" data-a style="--d:3">Validation success rate after 96k environment steps: LoLip 90%, Vanilla CFM 20%.</p>
-      </div>
+      <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
+      <p class="lede" data-a style="--d:3">Validation success rate after 96k environment steps: LoLip 90%, Vanilla CFM 20%.</p>
+      <div class="rw-vid" data-a style="--d:4"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div>
+      <div class="cap" data-a style="--d:4">The LoLip policy after RL, at 5× speed</div>
     </div>
-    <div class="fig rw" data-a style="--d:3">
-      <div class="rw-panel"><div class="panel-label">After RL · 5× speed</div>
-        <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div></div>
-      <div class="rw-panel"><div class="panel-label">Validation success during RL</div><div id="curveReal"></div></div>
-      <div class="cap rw-cap">YAM bimanual plate insertion · validation success rate over RL training, LoLip and Vanilla CFM · video: the LoLip policy after RL</div>
+    <div class="fig" data-a style="--d:2">
+      <div id="curveReal"></div>
+      <div class="cap">YAM bimanual plate insertion · validation success rate during RL training</div>
     </div>
   </section>
 

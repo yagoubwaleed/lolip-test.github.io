@@ -239,8 +239,7 @@ h2 b { font-weight: 600; }
 .dplay { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px 7px 11px; border-radius: 999px;
   border: 1px solid var(--hair); background: var(--surface); color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; transition: all .3s var(--ease-out); }
 .dplay:hover, .dplay.on { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
-.dstep { min-height: 5.9em; margin: 6px 2px 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); transition: opacity .22s; }
-.dstep.hint { color: var(--muted); }
+.dstep { height: 1.5em; margin: 4px 2px 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .22s; }
 .dstep .n { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--muted); margin-right: 9px; }
 .dg [data-s] { transition: opacity .5s var(--ease-out); }
 .dg.playing [data-s] { opacity: .13; }
@@ -272,10 +271,8 @@ h2 b { font-weight: 600; }
 .play { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--hair); background: var(--surface); color: var(--ink); cursor: pointer; display: grid; place-items: center; flex: none; transition: all .3s; }
 .play:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
-.wide .fig.rw { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 40px; max-width: min(900px, calc((100vh - 360px) * 2.6)); align-items: start; }
-.panel-label { font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.rw-cap { grid-column: 1 / -1; margin-top: 4px; }
-.rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); }
+.rw-vid { border-radius: 3px; overflow: hidden; background: var(--soft); width: min(100%, 400px, calc((100vh - 470px) * 1.33)); margin-top: 26px; }
+.rw-vid + .cap { margin-top: 8px; }
 .rw-vid video { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
@@ -304,7 +301,7 @@ h2 b { font-weight: 600; }
   .wide .head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .diagrams { grid-template-columns: 1fr; }
   .dg { height: auto; }
-  .wide .fig.rw { grid-template-columns: 1fr; max-width: 100%; }
+  .rw-vid { width: 100%; }
   .arrow { top: auto; bottom: 18px; margin-top: 0; width: 48px; height: 48px; }
   .arrow.prev { left: 16px; } .arrow.next { right: 16px; }
   .hint { display: none; }
