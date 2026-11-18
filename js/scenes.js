@@ -182,7 +182,20 @@ window.Scenes = (() => {
       };
       this.raf = requestAnimationFrame(step);
     }
-    stop() { cancelAnimationFrame(this.raf); }
+    stop() { cancelAnimationFrame(this.raf); cancelAnimationFrame(this.sparkRaf); this.sparkT = null; }
+    // site addition: while the noise policy is fit, the Pick Mug noises light up one by one in a random order
+    sparkle(at, sec, done) {
+      cancelAnimationFrame(this.sparkRaf);
+      if (window.SHOT) { done?.(); return; }
+      let t0 = null;
+      const step = (now) => {
+        t0 ??= now;
+        this.sparkT = (now - t0) / 1000;
+        this.draw(at);
+        if (this.sparkT < sec) this.sparkRaf = requestAnimationFrame(step); else { this.sparkT = null; this.draw(at); done?.(); }
+      };
+      this.sparkRaf = requestAnimationFrame(step);
+    }
     draw(t) {
       if (!this.W) return;
       this.T = tokens();
@@ -251,6 +264,7 @@ window.Scenes = (() => {
       this.text("Noise policy samples here", sl.xy, { size: 12.5, color: T.ink2, alpha: a_reg, align: "left", halo: true, dx: 4 });
       this.flow(N[hi], A[hi], TC[task[hi]], 2.2, 1, sramp(t, 3.2, 4.4), 9);
       this.dots([N[hi]], TC[task[hi]], a_hi, 5.5, 1.4);
+      if (this.sparkT != null) this.drawSparkle(N, task);
       for (const m of L.mode_labels) this.text(m.text, m.xy, { size: 13, color: m.color, weight: 550, halo: true });
       this.spaceLabels(a_noise, 1);
       if (this.showTarget) {                                   // site addition: the target of the inference step
@@ -265,6 +279,25 @@ window.Scenes = (() => {
         sramp(t, C.T_END_t + 0.1, C.T_END_t + 0.6), ok, ok ? "Correct action" : "Wrong action");
     }
   }
+
+  // each Pick Mug noise flashes once: start time from a fixed hash of its index, a glow, a bright core and a small star
+  Inference.prototype.drawSparkle = function (N, task) {
+    const x = this.ctx, b = this.b, T = this.sparkT, hash = (i) => { const v = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
+    x.save();
+    N.forEach((p, i) => {
+      if (task[i] !== "mugplace") return;
+      const l = (T - hash(i) * 1.5) / 0.55;
+      if (l <= 0 || l >= 1) return;
+      const k = Math.sin(Math.PI * l), X = this.px(p[0]), Y = this.py(p[1]);
+      const gr = x.createRadialGradient(X, Y, 0, X, Y, 11 * b * k + 1);
+      gr.addColorStop(0, "rgba(217,30,91,.55)"); gr.addColorStop(1, "rgba(217,30,91,0)");
+      x.globalAlpha = k; x.fillStyle = gr; x.beginPath(); x.arc(X, Y, 11 * b * k + 1, 0, 2 * Math.PI); x.fill();
+      x.fillStyle = MUG; x.beginPath(); x.arc(X, Y, (2.6 + 1.6 * k) * b, 0, 2 * Math.PI); x.fill();
+      x.strokeStyle = this.T.bg; x.lineWidth = 1.1 * b; x.globalAlpha = 0.9 * k; const r = 5.5 * b * k;
+      x.beginPath(); x.moveTo(X - r, Y); x.lineTo(X + r, Y); x.moveTo(X, Y - r); x.lineTo(X, Y + r); x.stroke();
+    });
+    x.restore();
+  };
 
   return { loadScene, Spread, Inference };
 })();

@@ -441,12 +441,15 @@ window.SLIDES = {};
     };
     const learn = (then) => {
       clear(); bL.disabled = bI.disabled = true; cur.showTarget = false;
+      const v = cur.sc.clock.speedup;
       st.textContent = "Mapping 240 demonstrations back through the flow to their noises…";
-      later(2.6, () => (st.textContent = "Fitting a noise policy to the noises of the Pick Mug demonstrations…"));
-      cur.play(0, cur.T0 + 1.3, cur.sc.clock.speedup, () => {
-        st.textContent = "Noise policy learned: the dotted circle is where it samples for “pick the mug”.";
-        bL.disabled = false; bL.classList.remove("solid"); bI.disabled = false; bI.classList.add("solid");
-        then?.();
+      cur.play(0, 2.6, v, () => {
+        st.textContent = "Fitting a noise policy to the noises of the Pick Mug demonstrations…";
+        cur.sparkle(2.6, 2.3, () => cur.play(2.6, cur.T0 + 1.3, v, () => {
+          st.textContent = "Noise policy learned: the dotted circle is where it samples for “pick the mug”.";
+          bL.disabled = false; bL.classList.remove("solid"); bI.disabled = false; bI.classList.add("solid");
+          then?.();
+        }));
       });
     };
     const infer = () => {
