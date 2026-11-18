@@ -363,9 +363,6 @@ window.SLIDES = {};
       ctx.save();
       ctx.filter = dim > 0.01 ? `blur(${(2.2 * dim).toFixed(2)}px)` : "none";
       ctx.globalAlpha = 1 - 0.78 * dim;
-      // equator ring, for depth
-      ctx.strokeStyle = cssVar("--hair"); ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.ellipse(cx, cy + R * 0.05, R * 1.12, R * 1.12 * Math.sin(tilt), 0, 0, 2 * Math.PI); ctx.stroke();
       const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
       const pts = [];
       for (let i = 0; i < N; i++) {
