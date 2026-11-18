@@ -29,6 +29,8 @@
   --box: #f2f2f2;
   --box-pink: #f2d7e1;
   --box-pink-edge: #c5426c;
+  --box-blue: #dcebf9;
+  --box-blue-edge: #4a7fb5;
   --frame: #b8b8b8;
   /* contraction scenes */
   --scene-disc: #f4f2ef;
@@ -63,6 +65,8 @@
   --box: #1b1b1f;
   --box-pink: #3a1522;
   --box-pink-edge: #ef4f86;
+  --box-blue: #14263b;
+  --box-blue-edge: #6fa3d8;
   --frame: #4a4a52;
   --scene-disc: #18181b;
   --scene-disc-edge: #3a3a40;

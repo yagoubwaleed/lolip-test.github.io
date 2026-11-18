@@ -273,8 +273,11 @@ window.SLIDES = {};
   const it = (s) => `<tspan font-style="italic">${s}</tspan>`;
   const SUB = (s) => `<tspan baseline-shift="sub" font-size=".68em">${s}</tspan>`;
   const SUP = (s) => `<tspan dx="2" baseline-shift="super" font-size=".62em">${s}</tspan>`;
-  function box(x0, x1, y, BH, name, pink, i) {
-    return `<g class="d-in" style="--i:${i}"><rect class="bx" x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${pink ? "var(--box-pink)" : "var(--box)"};stroke:${pink ? "var(--box-pink-edge)" : C.ink}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${name}</text></g>`;
+  // kind: "pink" = trained (noise policy), "frozen" = the pretrained flow policy (light blue, snowflake), else grey
+  function box(x0, x1, y, BH, name, kind, i) {
+    const [fill, edge] = kind === "pink" ? ["var(--box-pink)", "var(--box-pink-edge)"] : kind === "frozen" ? ["var(--box-blue)", "var(--box-blue-edge)"] : ["var(--box)", C.ink];
+    const label = kind === "frozen" ? `<tspan font-size=".86em">❄\uFE0F</tspan>\u2009${name}` : name;
+    return `<g class="d-in" style="--i:${i}"><rect class="bx" x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${fill};stroke:${edge}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${label}</text></g>`;
   }
   // step groups for the walk-through: G(steps, html, pulse) wraps a piece of the diagram; `steps` lists the steps that
   // light it up, `pulse` ("k.n") marks an arrow a dot travels along in step k (n-th in that step)
@@ -289,7 +292,7 @@ window.SLIDES = {};
     let p = "";
     st.forEach(([name, out, comps, col], k) => {
       const y = Y0 + k * P, i = 2 * k, step = k + 1;
-      p += G(step, box(BX0, BX1, y, BH, name, k === 2, i));
+      p += G(step, box(BX0, BX1, y, BH, name, k === 2 ? "pink" : k === 3 ? "frozen" : null, i));
       if (k + 1 < st.length) p += G(step + 1, arrowD([[cx, y + BH / 2 + 3], [cx, y + P - BH / 2 - 3]], C.ink, i + 1), `${step + 1}.1`);
       p += G(step, arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1), `${step}.3`);
       p += G(step, comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
@@ -309,7 +312,7 @@ window.SLIDES = {};
     p += G(1, `<text class="d-in" style="--i:0" x="${cx}" y="${YS[0] - BH / 2 - 52}">${it("s")}</text>` + arrowD([[cx, YS[0] - BH / 2 - 36], [cx, YS[0] - BH / 2 - 3]], C.ink, 0), "1.1");
     st.forEach(([name, out, comps, col], k) => {
       const y = YS[k], i = 1 + 2 * k, step = k + 2;
-      p += G(step, box(BX0, BX1, y, BH, name, k === 0, i));
+      p += G(step, box(BX0, BX1, y, BH, name, k === 0 ? "pink" : k === 1 ? "frozen" : null, i));
       if (k + 1 < st.length) p += G(step + 1, arrowD([[cx, y + BH / 2 + 3], [cx, YS[k + 1] - BH / 2 - 3]], C.ink, i + 1), `${step + 1}.1`);
       p += G(step, arrowD([[BX1 + 4, y], [GX - GW / 2 - 14, y]], C.ink, i + 1), `${step}.2`);
       p += G(step, comps ? gaussGlyph(GX, y, comps, col, GW, 44, i + 1) + `<text class="d-in" style="--i:${i + 1};text-anchor:start" x="${GX + GW / 2 + 16}" y="${y}">${out}</text>`
