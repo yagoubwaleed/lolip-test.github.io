@@ -47,7 +47,6 @@
     buttons.forEach((b, k) => b.setAttribute("aria-current", k === i));
     placePill();
     document.getElementById("countNow").textContent = pad(i + 1);
-    document.getElementById("progress").style.width = `${(100 * (i + 1)) / slides.length}%`;
     prev.disabled = i === 0;
     next.disabled = i === slides.length - 1;
     if (i > 0) { next.classList.remove("pulse"); document.getElementById("hint").style.opacity = 0; }

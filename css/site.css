@@ -61,8 +61,6 @@ b, strong { font-weight: 600; }
 }
 .count { font-family: "Geist Mono", monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .count b { color: var(--ink); font-weight: 500; }
-.progress { position: fixed; top: var(--nav-h); left: 0; height: 2px; background: var(--pink); z-index: 21;
-  transition: width .9s var(--ease); }
 
 /* ------------------------------------------------------------------ deck */
 .deck { position: fixed; inset: var(--nav-h) 0 0 0; overflow: hidden; }
