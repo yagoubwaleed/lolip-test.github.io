@@ -1,5 +1,7 @@
 // Horizontal slide deck: nav pill, arrows, keys, swipe, wheel, hash. Each slide can register hooks in
-// window.SLIDES[id] = { init(el), enter(el), leave(el) }; init runs once, on the first enter.
+// window.SLIDES[id] = { init(el), enter(el), leave(el), build(i) }; init runs once, on the first enter.
+// A slide with several .build figures shows one at a time: the arrows step through them before changing slide,
+// and a small step nav under the figure jumps between them (build(i) is called each time one is shown).
 (() => {
   // ?shot: no transitions, for headless screenshots
   if (location.search.includes("shot")) { window.SHOT = true; document.documentElement.classList.add("shot"); }
@@ -22,6 +24,32 @@
     nav.appendChild(li);
     return li.firstChild;
   });
+
+  const builds = (s) => [...s.querySelectorAll(".build")];
+  slides.forEach((s) => {
+    const bs = builds(s);
+    if (bs.length < 2) return;
+    const bn = document.createElement("div");
+    bn.className = "bnav";
+    bn.innerHTML = bs.map((b) => `<button><i></i>${b.dataset.label}</button>`).join("");
+    bn.querySelectorAll("button").forEach((x, k) => x.addEventListener("click", () => showBuild(s, k)));
+    s.querySelector(".tpl-body").appendChild(bn);
+  });
+  function showBuild(s, k) {
+    const bs = builds(s);
+    if (!bs.length) return;
+    s.dataset.b = k;
+    bs.forEach((el, j) => (el.hidden = j !== k));
+    s.querySelectorAll(".bnav button").forEach((x, j) => x.setAttribute("aria-current", j === k));
+    history.replaceState(null, "", "#" + s.id + (k ? ":" + k : ""));
+    window.SLIDES?.[s.id]?.build?.(k);
+  }
+  // arrows, keys, swipe and wheel: next build of this slide first, then the next slide
+  function step(d) {
+    const s = slides[cur], n = builds(s).length, k = +(s.dataset.b ?? 0);
+    if (n > 1 && k + d >= 0 && k + d < n) return showBuild(s, k + d);
+    go(cur + d, { fromEnd: d < 0 });
+  }
 
   function placePill() {
     const b = buttons[cur];
@@ -51,11 +79,13 @@
     const btn = dir === "next" ? next : prev;
     if (!opts.silent) { btn.classList.remove("go"); void btn.offsetWidth; btn.classList.add("go"); }
     history.replaceState(null, "", "#" + s.id);
-    const hooks = window.SLIDES?.[s.id];
+    const hooks = window.SLIDES?.[s.id], n = builds(s).length;
+    const k = opts.build ?? (opts.fromEnd ? Math.max(0, n - 1) : 0);
+    if (n) { s.dataset.b = k; builds(s).forEach((el, j) => (el.hidden = j !== k)); s.querySelectorAll(".bnav button").forEach((x, j) => x.setAttribute("aria-current", j === k)); }
     if (hooks) {
       if (!inited.has(s.id)) { inited.add(s.id); hooks.init?.(s); }
       // let the track move first, then play the slide's animation
-      setTimeout(() => { if (slides[cur] === s) hooks.enter?.(s); }, opts.silent ? 150 : 520);
+      setTimeout(async () => { if (slides[cur] !== s) return; await hooks.enter?.(s); if (n && slides[cur] === s) showBuild(s, k); }, opts.silent ? 150 : 520);
     }
   }
   window.goSlide = go;
@@ -67,14 +97,14 @@
     dispatchEvent(new Event("themechange"));
   });
 
-  prev.addEventListener("click", () => go(cur - 1));
-  next.addEventListener("click", () => go(cur + 1));
+  prev.addEventListener("click", () => step(-1));
+  next.addEventListener("click", () => step(1));
   document.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); go(+a.dataset.go); }));
   document.addEventListener("click", (e) => { const a = e.target.closest(".narr-go"); if (a) { e.preventDefault(); go(cur + 1); } });
   document.addEventListener("keydown", (e) => {
     if (e.target.closest("input, textarea")) return;
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
-    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); step(1); }
+    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); step(-1); }
     if (e.key === "Home") go(0);
     if (e.key === "End") go(slides.length - 1);
   });
@@ -85,7 +115,7 @@
   track.addEventListener("touchend", (e) => {
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx < 0 ? 1 : -1);
     x0 = null;
   });
 
@@ -95,13 +125,14 @@
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (Math.abs(d) < 18 || lock) return;
     lock = true;
-    go(cur + (d > 0 ? 1 : -1));
+    step(d > 0 ? 1 : -1);
     setTimeout(() => (lock = false), 1100);
   }, { passive: true });
 
   window.addEventListener("resize", () => cur >= 0 && placePill());
 
-  const start = Math.max(0, slides.findIndex((s) => "#" + s.id === location.hash));
+  const [hid, hb] = location.hash.slice(1).split(":");          // #slide or #slide:build
+  const start = Math.max(0, slides.findIndex((s) => s.id === hid));
   // fonts first, so the nav pill measures the final widths
-  (document.fonts?.ready ?? Promise.resolve()).then(() => go(start, { silent: true }));
+  (document.fonts?.ready ?? Promise.resolve()).then(() => go(start, { silent: true, build: hb ? +hb : undefined }));
 })();

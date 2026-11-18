@@ -546,7 +546,7 @@ window.SLIDES = {};
   }
   // action spread: plays on its own, with replay and an optional Vanilla / LoLip switch
   function spreadWidget(hostId, initial) {
-    const host = document.getElementById(hostId), bar = host.closest(".fig").querySelector(".scene-bar");
+    const host = document.getElementById(hostId), bar = host.closest(".build").querySelector(".fig-head");
     const get = scenePool(host, "spread");
     let p = initial, cur = null;
     const run = async () => { cur = await get(p); cur.t = 0; cur.play(0, cur.end, cur.sc.clock.speedup); };
@@ -557,7 +557,7 @@ window.SLIDES = {};
   }
   // noise policy demo: (1) invert the demonstrations and fit the noise policy, (2) sample from it for "pick the mug"
   function inferenceWidget(hostId, initial) {
-    const host = document.getElementById(hostId), fig = host.closest(".fig"), bar = fig.querySelector(".scene-bar");
+    const host = document.getElementById(hostId), fig = host.closest(".build"), bar = fig.querySelector(".fig-head");
     const bL = bar.querySelector("[data-learn]"), bI = bar.querySelector("[data-infer]"), st = fig.querySelector("[data-status]");
     const get = scenePool(host, "inference");
     let p = initial, cur = null, timers = [];
@@ -599,52 +599,32 @@ window.SLIDES = {};
     if (ps) seg(ps, async (v) => { p = v; await reset(); });
     return { reset, stop: () => { clear(); cur?.stop(); }, demo: () => learn(infer) };
   }
-  const paneSwitch = (segId, panes, capEl, caps, onShow) => {
-    capEl.textContent = caps.scene;
-    seg(document.getElementById(segId), (v) => {
-      for (const k in panes) document.getElementById(panes[k]).hidden = k !== v;
-      capEl.closest(".fig").querySelector(".scene-bar").classList.toggle("alt", v !== "scene");
-      const st = capEl.closest(".fig").querySelector("[data-status]");
-      if (st) st.hidden = v !== "scene";
-      capEl.textContent = caps[v];
-      onShow(v);
-    });
-  };
-
-  let wContr, hF, contrMode = "scene";
+  let wContr, hF;
   SLIDES.contraction = {
     async init() {
       wContr = spreadWidget("sceneSpreadV", "vanilla");
-      paneSwitch("segContr", { scene: "contrScenePane", hist: "contrHistPane" }, document.getElementById("contrCap"), {
-        scene: "Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk and the noise it maps back to through the flow · the 8 far-apart noises and the drawing scale are chosen for illustration · robot: the 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)",
-        hist: "Isaac Lab, Vanilla CFM · all 28 singular values of the Jacobian ∂a/∂z of the 100-step flow · 3 training seeds, 50,232 values · hover to read",
-      }, (v) => { contrMode = v; v === "scene" ? wContr.run() : (wContr.stop(), hF.play()); });
       const d = (await load("singular_values")).forward;
       hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
       hF.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
       document.getElementById("contrMed").textContent = d.vanilla.median.toFixed(4);
       document.getElementById("contrX").textContent = Math.round(1 / d.vanilla.median);
     },
-    async enter() { await load("singular_values"); contrMode === "scene" ? wContr.run() : hF.play(); },
+    async enter() { await load("singular_values"); },
+    build(k) { if (k === 0) wContr.run(); else { wContr.stop(); hF.play(); } },
     leave() { wContr.stop(); },
   };
 
-  let wExp, expH, expMode = "scene";
-  const sceneCap = (who) => `Isaac Lab, ${who} (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2`;
+  let wExp, expH;
   SLIDES.expansion = {
     async init() {
       wExp = inferenceWidget("sceneInfV", "vanilla");
-      paneSwitch("segExp", { scene: "expScenePane", hist: "expHistPane" }, document.getElementById("expCap"), {
-        scene: sceneCap("Vanilla CFM"),
-        hist: "Isaac Lab, Vanilla CFM · singular values of the inverse map ∂z/∂a (the reciprocals of those of ∂a/∂z) · 3 training seeds, 50,232 values · hover to read",
-      }, (v) => { expMode = v; v === "scene" ? wExp.reset() : (wExp.stop(), expH.play()); });
       const d = (await load("singular_values")).inverse;
       expH = histChart(document.getElementById("expHist"), { edges: d.edges, lo: 1e-2, hi: 1e6, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂z/∂a", readout: invReadout });
       expH.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
     },
-    async enter() {
-      await load("singular_values");
-      if (expMode !== "scene") return expH.play();
+    async enter() { await load("singular_values"); },
+    async build(k) {
+      if (k === 1) { wExp.stop(); return expH.play(); }
       await wExp.reset();
       if (window.SHOT) wExp.demo();
     },
@@ -688,18 +668,15 @@ window.SLIDES = {};
       document.getElementById("morphPlay").addEventListener("click", () => this.run());
       addEventListener("themechange", () => { set(range.value / 1000); hM.draw(1); });
     },
-    async enter() { await load("singular_values"); this.run?.(); },
+    async enter() { await load("singular_values"); },
+    build() { this.run?.(); },
     leave() { morphStop(); },
   };
 
-  let wSpread, bS, spreadMode = "scene";
+  let wSpread, bS;
   SLIDES.spread = {
     async init() {
       wSpread = spreadWidget("sceneSpreadL", "lolip");
-      paneSwitch("segSpread", { scene: "spreadScenePane", bars: "spreadBarsPane" }, document.getElementById("spreadCap"), {
-        scene: "Isaac Lab, LoLip and Vanilla CFM (training seed 0) · the same 8 far-apart noises for both policies; the noises and the drawing scale are chosen for illustration · robot: 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)",
-        bars: "LIBERO-Goal · standard deviation over 256 noise samples of each of the 112 action values (16 steps × 7 dimensions), averaged over the 112 values and over 128 states per task",
-      }, (v) => { spreadMode = v; v === "scene" ? wSpread.run() : (wSpread.stop(), bS.play()); });
       const d = await load("action_std");
       const groups = d.tasks.map((t) => ({ name: t.name, vanilla: { mean: t.vanilla }, lolip: { mean: t.lolip } }));
       const mx = d3.max(groups, (g) => g.lolip.mean);
@@ -707,14 +684,15 @@ window.SLIDES = {};
       const lo = d3.min(d.tasks, (t) => t.ratio), hi = d3.max(d.tasks, (t) => t.ratio);
       document.getElementById("spreadRange").textContent = `${lo.toFixed(2)}–${hi.toFixed(2)}`;
     },
-    async enter() { await load("action_std"); spreadMode === "scene" ? wSpread.run() : bS.play(); },
+    async enter() { await load("action_std"); },
+    build(k) { if (k === 0) wSpread.run(); else { wSpread.stop(); bS.play(); } },
     leave() { wSpread.stop(); },
   };
 
   let wSep;
   SLIDES.separation = {
     init() { wSep = inferenceWidget("sceneInfL", "lolip"); },
-    async enter() { await wSep.reset(); if (window.SHOT) wSep.demo(); },
+    async build() { await wSep.reset(); if (window.SHOT) wSep.demo(); },
     leave() { wSep.stop(); },
   };
 
@@ -724,34 +702,22 @@ window.SLIDES = {};
       const d = await load("goal_dsbc");
       bD = barChart(document.getElementById("barsDSBC"), { groups: d.bars, yMax: 1.06, yTicks: [0, .25, .5, .75, 1], rotate: true, sepBeforeLast: true, H: 420 });
     },
-    async enter() { await load("goal_dsbc"); bD.play(); },
+    async enter() { await load("goal_dsbc"); },
+    build() { bD.play(); },
   };
 
-  let cRL, rlSet = "goal";
+  const RL = {};
   SLIDES.dsrl = {
     async init() {
       const d = await load("rl");
-      const host = document.getElementById("curvesRL");
-      const legend = document.createElement("div");
-      legend.className = "legend";
-      host.before(legend);
       const at = (p, k) => d3.mean(p, (x) => x[k].mean.at(-1));
-      const draw = (v) => {
-        rlSet = v;
-        cRL = curvesChart(host, d.steps, d[v], { legendEl: legend });
-        const l = at(d[v], "lolip"), va = at(d[v], "vanilla");
-        document.getElementById("rlStatLbl").textContent
-          = `Success rate after 500k environment steps, averaged over ${v === "goal" ? "4 LIBERO-Goal" : "5 LIBERO-10"} tasks: LoLip ${pct(l, 1)}, Vanilla CFM ${pct(va, 1)}.`;
-        document.getElementById("rlCap").textContent = v === "goal"
-          ? "Line: mean over 3 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs"
-          : "Line: mean over 2 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs";
-        cRL.play();
-      };
-      this.draw = draw;
-      seg(document.getElementById("segRL"), draw);
-      draw("goal");
+      for (const [v, host, leg, name] of [["goal", "curvesGoal", "legGoal", "4 LIBERO-Goal"], ["libero10", "curves10", "leg10", "5 LIBERO-10"]]) {
+        RL[v] = { chart: curvesChart(document.getElementById(host), d.steps, d[v], { legendEl: document.getElementById(leg) }),
+                  text: `Success rate after 500k environment steps, averaged over ${name} tasks: LoLip ${pct(at(d[v], "lolip"), 1)}, Vanilla CFM ${pct(at(d[v], "vanilla"), 1)}.` };
+      }
     },
-    async enter() { await load("rl"); cRL?.play(); },
+    async enter() { await load("rl"); },
+    build(k) { const r = RL[k ? "libero10" : "goal"]; document.getElementById("rlStatLbl").textContent = r.text; r.chart.play(); },
   };
 
   let cReal;
@@ -794,7 +760,8 @@ window.SLIDES = {};
       let cancel = () => {};
       cReal = { play() { cancel(); ends.attr("opacity", 0); cancel = tween(1900, (k) => { clip.attr("width", W * ease(k)); ends.attr("opacity", clamp(k * 4 - 3)); }); } };
     },
-    async enter() { await load("real_world"); cReal.play(); playVid("vPlate"); },
+    async enter() { await load("real_world"); },
+    build() { cReal.play(); playVid("vPlate"); },
     leave() { stopVid("vPlate"); },
   };
 
@@ -804,6 +771,7 @@ window.SLIDES = {};
       const d = await load("libero90");
       bC = barChart(document.getElementById("barsCost"), { groups: d.groups, yMax: 1.06, yTicks: [0, .25, .5, .75, 1], labels: true });
     },
-    async enter() { await load("libero90"); bC.play(); },
+    async enter() { await load("libero90"); },
+    build() { bC.play(); },
   };
 })();
