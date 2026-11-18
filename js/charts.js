@@ -319,10 +319,10 @@ window.SLIDES = {};
   }
 
   // ------------------------------------------------------------ intro: rotating 3D noise space, narrated
-  // The 299 real points are demonstrations' first action chunks mapped back through the flow to their noise (Isaac
-  // Lab, seed 0, train + held-out), in 3D PCA. For density each one gets DENSE - 1 companions jittered around it
-  // (illustration only), which follow it through the morph from the Vanilla CFM noise space to the LoLip one.
-  // The narration dims the cloud; it un-dims to show the noise space at the marked moments.
+  // The cloud: for each task and policy, a Gaussian fit (robust covariance) to the 3D PCA of the real inverted noises
+  // (Isaac Lab, seed 0, 299 demonstrations; tools/export_site_data.py). Each dot is one standard-normal draw u, placed
+  // at mu + A u in both policies' fits, so it morphs from its Vanilla CFM position to its LoLip one.
+  // The narration dims the cloud (CSS opacity / blur on the canvas); it un-dims to show the noise space.
   const NARRATION = [
     [2.4, "We want to finetune this flow policy <b>without touching its weights</b>, by learning in its noise space."],
     [7.0, "But this noise space is difficult to learn: the noises of different tasks are intermixed."],
@@ -335,20 +335,22 @@ window.SLIDES = {};
   ];
   const DIM = [[2.2, 10.4], [12.9, 21.2], [27.2, 1e9]];   // dimmed while the narration is on screen
   const MORPH = [21.8, 25.0];
-  const DENSE = 4;
+  const PER_TASK = 650, LEVELS = 7;
   function cloud3D(cv, data, narr) {
     const ctx = cv.getContext("2d"), p = narr.querySelector("p");
-    const hash = (i) => ((Math.sin(i * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1;
-    const gauss = (i) => Math.sqrt(-2 * Math.log(hash(i) * 0.999 + 0.001)) * Math.cos(2 * Math.PI * hash(i + 7919));
+    let seed = 7;
+    const rnd = () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const normal = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+    const place = (f, u) => f.mu.map((m, r) => m + f.A[r].reduce((s, a, c) => s + a * u[c], 0));
     const V = [], L = [], task = [], order = [];
-    data.task3.forEach((t, i) => {
-      for (let k = 0; k < DENSE; k++) {
-        const j = i * DENSE + k, s = k ? 0.07 : 0, o = [0, 1, 2].map((d) => s * gauss(j * 3 + d + 11));
-        V.push(data.vanilla3[i].map((v, d) => v + o[d])); L.push(data.lolip3[i].map((v, d) => v + o[d]));
-        task.push(t); order.push(hash(i));
-      }
-    });
+    for (const t of ["mug", "bowl"]) for (let k = 0; k < PER_TASK; k++) {
+      const u = [normal(), normal(), normal()];
+      V.push(place(data.cloud[t].vanilla, u)); L.push(place(data.cloud[t].lolip, u)); task.push(t); order.push(rnd());
+    }
     const N = task.length;
+    const r97 = (Q) => Q.map((v) => Math.hypot(...v)).sort((a, b) => a - b)[Math.floor(0.97 * N)];
+    const scale = 1 / Math.max(r97(V), r97(L));               // both states fit the canvas
+    for (const P of [V, L]) for (const v of P) for (let d = 0; d < 3; d++) v[d] *= scale;
     let W, H, raf = null, t0 = null, shown = -1;
     const sstep = (t, a, b) => { const x = clamp((t - a) / (b - a)); return x * x * (3 - 2 * x); };
     function size() {
@@ -366,36 +368,34 @@ window.SLIDES = {};
       const html = k >= 0 ? NARRATION[k][1] : null;
       setTimeout(() => { if (shown === k && html) { p.innerHTML = html; p.classList.add("on"); } }, window.SHOT ? 0 : 420);
     }
+    const paths = Array.from({ length: LEVELS * 2 }, () => null);
     function frame(now) {
       t0 ??= now;
       if (!W) { if (!window.SHOT) raf = requestAnimationFrame(frame); return; }
-      const e = window.SHOT ? 26 : (now - t0) / 1000, rot = now / 1000 * 0.32, tilt = 0.42;
+      const e = window.SHOT ? 26 : (now - t0) / 1000, rot = (now / 1000) * 0.45, tilt = 0.42;
       narrate(e);
       const dim = Math.max(...DIM.map(([a, b]) => sstep(e, a, a + 0.7) * (1 - sstep(e, b, b + 0.6))));
+      cv.style.opacity = (1 - 0.78 * dim).toFixed(3);
+      cv.style.filter = dim > 0.01 ? `blur(${(2.2 * dim).toFixed(2)}px)` : "none";
       const m = sstep(e, MORPH[0], MORPH[1]);
-      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.34;
-      ctx.clearRect(0, 0, W, H);
-      ctx.save();
-      ctx.filter = dim > 0.01 ? `blur(${(2.2 * dim).toFixed(2)}px)` : "none";
-      ctx.globalAlpha = 1 - 0.78 * dim;
+      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.4;
       const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
-      const pts = [];
+      for (let k = 0; k < paths.length; k++) paths[k] = new Path2D();
       for (let i = 0; i < N; i++) {
-        const f = sstep(m * 1.5 - order[i] * 0.5, 0, 1);
-        const x = V[i][0] + (L[i][0] - V[i][0]) * f, y = V[i][1] + (L[i][1] - V[i][1]) * f, z = V[i][2] + (L[i][2] - V[i][2]) * f;
-        const x1 = x * cr + z * sr, z1 = -x * sr + z * cr;
-        const y2 = y * ct - z1 * st, z2 = y * st + z1 * ct;
-        const persp = 3.2 / (3.2 + z2);
-        pts.push([cx + x1 * R * persp, cy - y2 * R * persp, z2, persp, i]);
+        const f = m <= 0 ? 0 : m >= 1 ? 1 : sstep(m * 1.5 - order[i] * 0.5, 0, 1), a = V[i], b = L[i];
+        const x = a[0] + (b[0] - a[0]) * f, y = a[1] + (b[1] - a[1]) * f, z = a[2] + (b[2] - a[2]) * f;
+        const x1 = x * cr + z * sr, z1 = -x * sr + z * cr, y2 = y * ct - z1 * st, z2 = y * st + z1 * ct;
+        const persp = 3.2 / (3.2 + z2), X = cx + x1 * R * persp, Y = cy - y2 * R * persp, r = 2.3 * persp;
+        const lvl = Math.min(LEVELS - 1, Math.max(0, Math.floor(((1.3 - z2) / 2.6) * LEVELS)));   // 0 = far
+        const path = paths[lvl * 2 + (task[i] === "mug" ? 0 : 1)];
+        path.moveTo(X + r, Y); path.arc(X, Y, r, 0, 2 * Math.PI);
       }
-      pts.sort((a, b) => b[2] - a[2]);
-      for (const [X, Y, z, persp, i] of pts) {
-        const depth = clamp((1.4 - z) / 2.8);
-        ctx.globalAlpha = (1 - 0.78 * dim) * (0.3 + 0.65 * depth);
-        ctx.fillStyle = task[i] === "mug" ? C.mug : C.bowl;
-        ctx.beginPath(); ctx.arc(X, Y, 2.6 * persp, 0, 2 * Math.PI); ctx.fill();
+      ctx.clearRect(0, 0, W, H);
+      for (let l = 0; l < LEVELS; l++) {                       // far to near
+        ctx.globalAlpha = 0.28 + (0.62 * l) / (LEVELS - 1);
+        ctx.fillStyle = C.bowl; ctx.fill(paths[l * 2 + 1]);
+        ctx.fillStyle = C.mug; ctx.fill(paths[l * 2]);
       }
-      ctx.restore();
       if (!window.SHOT) raf = requestAnimationFrame(frame);
     }
     size();
