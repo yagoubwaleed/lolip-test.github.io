@@ -471,7 +471,8 @@ window.SLIDES = {};
       const d = (await load("singular_values")).forward;
       hF = histChart(document.getElementById("histForward"), { edges: d.edges, lo: 1e-6, hi: 1e2, ymax: 1.12 * d3.max(d.vanilla.share), ref: 1, refLabel: "no change", xLabel: "Singular value of ∂a/∂z", readout: fwdReadout });
       hF.set([{ key: "v", share: d.vanilla.share, color: "#b4b4b8", label: "Vanilla CFM", labelColor: C.ink }]);
-      document.getElementById("contrMed").textContent = `${Math.round(1 / d.vanilla.median)}×`;
+      document.getElementById("contrMed").textContent = d.vanilla.median.toFixed(4);
+      document.getElementById("contrX").textContent = Math.round(1 / d.vanilla.median);
     },
     async enter() { await load("singular_values"); hF.play(); },
   };
@@ -548,7 +549,7 @@ window.SLIDES = {};
       const mx = d3.max(groups, (g) => g.lolip.mean);
       bS = barChart(document.getElementById("barsSpread"), { groups, yMax: mx * 1.2, yTicks: [0, mx * 0.4, mx * 0.8].map((v) => +v.toPrecision(1)), fmt: (v) => v.toFixed(2), ratio: true });
       const lo = d3.min(d.tasks, (t) => t.ratio), hi = d3.max(d.tasks, (t) => t.ratio);
-      document.getElementById("spreadLbl").innerHTML = `ratio of LoLip's to Vanilla CFM's action standard deviation (${lo.toFixed(2)}–${hi.toFixed(2)}× on the 4 LIBERO-Goal tasks)`;
+      document.getElementById("spreadRange").textContent = `${lo.toFixed(2)}–${hi.toFixed(2)}`;
     },
     async enter() { await load("action_std"); bS.play(); },
   };
@@ -591,10 +592,8 @@ window.SLIDES = {};
         rlSet = v;
         cRL = curvesChart(host, d.steps, d[v], { legendEl: legend });
         const l = at(d[v], "lolip"), va = at(d[v], "vanilla");
-        document.getElementById("rlStat").textContent = pct(l, 1);
-        document.getElementById("rlStatLbl").textContent = v === "goal"
-          ? `success rate after 500k environment steps, averaged over 4 LIBERO-Goal tasks (Vanilla CFM ${pct(va, 1)})`
-          : `success rate after 500k environment steps, averaged over 5 LIBERO-10 tasks (Vanilla CFM ${pct(va, 1)})`;
+        document.getElementById("rlStatLbl").textContent
+          = `Success rate after 500k environment steps, averaged over ${v === "goal" ? "4 LIBERO-Goal" : "5 LIBERO-10"} tasks: LoLip ${pct(l, 1)}, Vanilla CFM ${pct(va, 1)}.`;
         document.getElementById("rlCap").textContent = v === "goal"
           ? "Line: mean over 3 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs"
           : "Line: mean over 2 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs";

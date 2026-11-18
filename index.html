@@ -71,7 +71,7 @@
     <div>
       <h2 data-a style="--d:1">Forward flows are <b>contractive</b>.</h2>
       <p class="lede" data-a style="--d:2">We measure how much a small change in the input noise changes the action a standard flow policy (Vanilla CFM) outputs. The change in the action is far smaller than the change in the noise, which leaves RL that acts on the noise little to explore.</p>
-      <div class="stat" data-a style="--d:3"><span class="big" id="contrMed">—</span><span class="lbl">median factor by which a change in the noise is scaled down in the action (from the singular values of ∂a/∂z)</span></div>
+      <p class="lede" data-a style="--d:3">The median singular value of ∂a/∂z is <span id="contrMed">0.0037</span>: a change in the noise is typically scaled down by a factor of about <span id="contrX">270</span> in the action.</p>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="histForward"></div>
@@ -120,7 +120,7 @@
     <div>
       <h2 data-a style="--d:1">LoLip <b>fixes the forward contraction</b>.</h2>
       <p class="lede" data-a style="--d:2">At a fixed robot state, we sample 256 noise vectors, run the flow policy on each, and measure how much the resulting actions vary (their standard deviation).</p>
-      <div class="stat" data-a style="--d:3"><span class="big">≈2×</span><span class="lbl" id="spreadLbl">LoLip's actions vary about twice as much as Vanilla CFM's, on each of 4 LIBERO-Goal tasks</span></div>
+      <p class="lede" data-a style="--d:3">On the 4 LIBERO-Goal tasks, LoLip's action standard deviation is <span id="spreadRange">1.95–2.12</span> times that of Vanilla CFM.</p>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="barsSpread"></div>
@@ -151,7 +151,7 @@
     <div>
       <h2 data-a style="--d:1">LoLip makes <b>DSBC</b> work in multitask settings.</h2>
       <p class="lede" data-a style="--d:2">LIBERO-Goal, 10 tasks. The base policy is trained without the task instruction. A DSBC noise policy, which receives the instruction, chooses the base policy's noise so that it performs the requested task.</p>
-      <div class="stat" data-a style="--d:3"><span class="big">64.3%</span><span class="lbl"><b>vs 38.7%</b> for Vanilla CFM<br>success rate averaged over the 10 tasks</span></div>
+      <p class="lede" data-a style="--d:3">Success rate averaged over the 10 tasks: LoLip 64.3%, Vanilla CFM 38.7%.</p>
     </div>
     <div class="fig" data-a style="--d:2">
       <div id="barsDSBC"></div>
@@ -164,7 +164,7 @@
     <div>
       <h2 data-a style="--d:1">LoLip makes <b>DSRL</b> learn faster, also on long-horizon tasks.</h2>
       <p class="lede" data-a style="--d:2">A base policy trained on LIBERO-90 is frozen. On a new task, an RL agent (SAC) learns from the task reward which noise to give it.</p>
-      <div class="stat" data-a style="--d:3"><span class="big" id="rlStat">99.0%</span><span class="lbl" id="rlStatLbl"></span></div>
+      <p class="lede" data-a style="--d:3" id="rlStatLbl"></p>
     </div>
     <div class="fig" data-a style="--d:2">
       <div class="seg" id="segRL"><span class="knob"></span><button aria-pressed="true" data-v="goal">LIBERO-Goal</button><button aria-pressed="false" data-v="libero10">LIBERO-10 · long-horizon</button></div>
@@ -178,7 +178,7 @@
     <div>
       <h2 data-a style="--d:1">LoLip learns real-world RL tasks <b>in under 100 episodes</b>.</h2>
       <p class="lede" data-a style="--d:2">Bimanual plate insertion with two YAM arms. An RL agent learns from the task reward which noise to give the pretrained base policy.</p>
-      <div class="stat" data-a style="--d:3"><span class="big">90%</span><span class="lbl"><b>vs 20%</b> for Vanilla CFM<br>validation success rate after 96k environment steps</span></div>
+      <p class="lede" data-a style="--d:3">Validation success rate after 96k environment steps: LoLip 90%, Vanilla CFM 20%.</p>
     </div>
     <div class="fig rw" data-a style="--d:2">
       <div class="rw-vid"><video id="vPlate" muted loop playsinline preload="none" poster="media/plate_lolip.jpg" src="media/plate_lolip.mp4"></video></div>
