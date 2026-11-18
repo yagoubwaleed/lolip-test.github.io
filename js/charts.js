@@ -318,49 +318,80 @@ window.SLIDES = {};
     return `<svg class="dg" viewBox="0 0 ${W} ${H}">${p}</svg>`;
   }
 
-  // ------------------------------------------------------------ intro: noise flowing into actions
-  function flowCanvas(cv, data) {
-    const ctx = cv.getContext("2d");
-    let W, H, R, RA, cxN, cxA, cy, raf = null;
-    const N = data.task.length;
-    const parts = d3.range(N).map((i) => ({ i, t: Math.random(), v: 0.0028 + Math.random() * 0.0028 }));
+  // ------------------------------------------------------------ intro: rotating 3D noise space, narrated
+  // Each point is one training demonstration's first action chunk mapped back through the flow to its noise
+  // (Isaac Lab, seed 0), shown in 3D PCA. The narration dims the cloud; at the end it morphs, point by point, from the
+  // Vanilla CFM noise space to the LoLip one (aligned by rotation only).
+  const NARRATION = [
+    [2.4, "We want to finetune this flow policy <b>without touching its weights</b>, by learning in its noise space."],
+    [7.2, "But this is difficult: the noises of different tasks are intermixed."],
+    [11.4, "What if there was a way to make this noise space easier to learn?"],
+    [15.4, "Introducing <b>LoLip</b>, a regularizer that creates smoother latent spaces."],
+    [19.6, null],
+  ];
+  const MORPH = [20.0, 23.2];
+  function cloud3D(cv, data, narr) {
+    const ctx = cv.getContext("2d"), N = data.task.length, p = narr.querySelector("p");
+    const V = data.vanilla3, L = data.lolip3;
+    const order = d3.range(N).map((i) => ((Math.sin(i * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1);
+    let W, H, raf = null, t0 = null, shown = -1;
+    const sstep = (t, a, b) => { const x = clamp((t - a) / (b - a)); return x * x * (3 - 2 * x); };
     function size() {
       const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-      cv.width = r.width * dpr; cv.height = r.height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      W = r.width; H = r.height; R = Math.min(H * 0.4, W * 0.21); RA = R * 0.8; cxN = R + 14; cxA = W - RA - 18; cy = H / 2;
+      if (!r.width) return;
+      cv.width = r.width * dpr; cv.height = r.height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); W = r.width; H = r.height;
+      if (window.SHOT && t0 !== null) frame(performance.now());     // resizing clears the canvas
     }
-    const nP = (i) => [cxN + data.lolip[i][0] * R, cy - data.lolip[i][1] * R];
-    const aP = (i) => [cxA + data.action[i][0] * RA, cy - data.action[i][1] * RA];
-    const bez = (p, q, t) => {
-      const c1 = [p[0] + (q[0] - p[0]) * 0.45, p[1]], c2 = [q[0] - (q[0] - p[0]) * 0.45, q[1]], u = 1 - t;
-      return [u * u * u * p[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * q[0], u * u * u * p[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * q[1]];
-    };
-    const col = (i, a) => (data.task[i] === "mug" ? `rgba(217,30,91,${a})` : `rgba(228,138,86,${a})`);
-    function frame() {
+    function narrate(e) {
+      let k = -1;
+      NARRATION.forEach(([at], i) => { if (e >= at) k = i; });
+      if (k === shown) return;
+      shown = k;
+      p.classList.remove("on");
+      const html = k >= 0 ? NARRATION[k][1] : null;
+      setTimeout(() => { if (shown === k && html) { p.innerHTML = html; p.classList.add("on"); } }, window.SHOT ? 0 : 420);
+    }
+    function frame(now) {
+      t0 ??= now;
+      if (!W) { if (!window.SHOT) raf = requestAnimationFrame(frame); return; }
+      const e = window.SHOT ? 30 : (now - t0) / 1000, rot = now / 1000 * 0.32, tilt = 0.42;
+      narrate(e);
+      const dim = sstep(e, 2.0, 2.8) * (1 - sstep(e, 19.2, 20.0));
+      const m = sstep(e, MORPH[0], MORPH[1]);
+      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.34;
       ctx.clearRect(0, 0, W, H);
-      const disc = cssVar("--disc"), edge = cssVar("--hair");
-      for (const [x0, r] of [[cxN, R], [cxA, RA]]) { ctx.beginPath(); ctx.arc(x0, cy, r, 0, 7); ctx.fillStyle = disc; ctx.fill(); ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.stroke(); }
+      ctx.save();
+      ctx.filter = dim > 0.01 ? `blur(${(2.2 * dim).toFixed(2)}px)` : "none";
+      ctx.globalAlpha = 1 - 0.78 * dim;
+      // equator ring, for depth
+      ctx.strokeStyle = cssVar("--hair"); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(cx, cy + R * 0.05, R * 1.12, R * 1.12 * Math.sin(tilt), 0, 0, 2 * Math.PI); ctx.stroke();
+      const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
+      const pts = [];
       for (let i = 0; i < N; i++) {
-        const [a, b] = nP(i), [c, d] = aP(i);
-        ctx.fillStyle = col(i, .32); ctx.beginPath(); ctx.arc(a, b, 2.4, 0, 7); ctx.fill();
-        ctx.fillStyle = col(i, .32); ctx.beginPath(); ctx.arc(c, d, 2.2, 0, 7); ctx.fill();
+        const f = sstep(m * 1.5 - order[i] * 0.5, 0, 1);
+        const x = V[i][0] + (L[i][0] - V[i][0]) * f, y = V[i][1] + (L[i][1] - V[i][1]) * f, z = V[i][2] + (L[i][2] - V[i][2]) * f;
+        const x1 = x * cr + z * sr, z1 = -x * sr + z * cr;
+        const y2 = y * ct - z1 * st, z2 = y * st + z1 * ct;
+        const persp = 3.2 / (3.2 + z2);
+        pts.push([cx + x1 * R * persp, cy - y2 * R * persp, z2, persp, i]);
       }
-      for (const p of parts) {
-        p.t += p.v;
-        if (p.t > 1) { p.t = 0; p.v = 0.0028 + Math.random() * 0.0028; }
-        const s = nP(p.i), e = aP(p.i);
-        ctx.beginPath();
-        for (let k = 0; k <= 8; k++) { const q = bez(s, e, Math.max(0, p.t - 0.12 + (k / 8) * 0.12)); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
-        const fade = Math.sin(Math.PI * p.t);
-        ctx.strokeStyle = col(p.i, 0.5 * fade); ctx.lineWidth = 1.4; ctx.stroke();
-        const h = bez(s, e, p.t);
-        ctx.fillStyle = col(p.i, 0.9 * fade); ctx.beginPath(); ctx.arc(h[0], h[1], 2.2, 0, 7); ctx.fill();
+      pts.sort((a, b) => b[2] - a[2]);
+      for (const [X, Y, z, persp, i] of pts) {
+        const depth = clamp((1.4 - z) / 2.8);
+        ctx.globalAlpha = (1 - 0.78 * dim) * (0.3 + 0.65 * depth);
+        ctx.fillStyle = data.task[i] === "mug" ? C.mug : C.bowl;
+        ctx.beginPath(); ctx.arc(X, Y, 3.4 * persp, 0, 2 * Math.PI); ctx.fill();
       }
-      raf = requestAnimationFrame(frame);
+      ctx.restore();
+      if (!window.SHOT) raf = requestAnimationFrame(frame);
     }
     size();
-    addEventListener("resize", size);
-    return { start() { if (!raf) frame(); }, stop() { cancelAnimationFrame(raf); raf = null; } };
+    new ResizeObserver(size).observe(cv);
+    return {
+      start() { cancelAnimationFrame(raf); t0 = null; shown = -1; p.classList.remove("on"); raf = requestAnimationFrame(frame); if (window.SHOT) frame(performance.now()); },
+      stop() { cancelAnimationFrame(raf); raf = null; },
+    };
   }
 
   // ------------------------------------------------------------ segmented toggle
@@ -381,11 +412,14 @@ window.SLIDES = {};
   const playVid = (...ids) => ids.forEach((id) => { const v = document.getElementById(id); v.currentTime = 0; v.play().catch(() => {}); });
   const stopVid = (...ids) => ids.forEach((id) => document.getElementById(id).pause());
 
-  let flow;
+  let cloud;
   SLIDES.intro = {
-    init: async () => { flow = flowCanvas(document.getElementById("flowCanvas"), await load("latent")); },
-    enter: async () => { await load("latent"); flow?.start(); },
-    leave: () => flow?.stop(),
+    async init() {
+      cloud = cloud3D(document.getElementById("cloudCanvas"), await load("latent"), document.getElementById("narr"));
+      document.getElementById("cloudReplay").addEventListener("click", () => cloud.start());
+    },
+    async enter() { await load("latent"); cloud?.start(); },
+    leave() { cloud?.stop(); },
   };
 
   SLIDES.setting = {

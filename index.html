@@ -35,7 +35,7 @@
   <section class="slide title-slide" id="intro" data-title="Intro">
     <div>
       <p class="eyebrow" data-a style="--d:0">University of Washington · Hitachi · UC Berkeley</p>
-      <h1 data-a style="--d:1">Lipschitz-Regularized <b>Pretraining</b> for <b class="pk">Efficient</b> Downstream Finetuning</h1>
+      <h1 data-a style="--d:1">Lipschitz-Regularized <b>Pretraining</b> for <b>Efficient</b> Downstream Finetuning</h1>
       <div class="authors" data-a style="--d:2">
         <span>Shubham Mittal<sup>*1</sup></span><span>Yunchu Zhang<sup>*1</sup></span><span>Waleed Yagoub<sup>*1</sup></span>
         <span>William Huey<sup>1</sup></span><span>Zev Alvidrez<sup>1</sup></span><span>Kanta Hamasaki<sup>2</sup></span>
@@ -49,8 +49,10 @@
       </div>
     </div>
     <div class="fig" data-a style="--d:3">
-      <canvas id="flowCanvas"></canvas>
-      <div class="flow-labels"><span>Noise</span><span>Action</span></div>
+      <div class="cloud"><canvas id="cloudCanvas"></canvas><div class="narr" id="narr"><p></p></div></div>
+      <div class="cloud-bar">
+        <button class="sbtn" id="cloudReplay">↺ Replay</button>
+      </div>
     </div>
   </section>
 

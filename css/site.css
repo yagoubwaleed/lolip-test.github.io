@@ -223,8 +223,12 @@ h2 b { font-weight: 600; }
 .btn.solid { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .btn.solid:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
 .btn.soon { color: var(--faint); pointer-events: none; }
-#flowCanvas { width: 100%; aspect-ratio: 1.45; display: block; }
-.flow-labels { display: flex; justify-content: space-between; font-family: "Geist Mono", monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: 0 9% 0 7%; margin-top: 6px; }
+.cloud { position: relative; }
+#cloudCanvas { width: 100%; aspect-ratio: 1.15; display: block; }
+.narr { position: absolute; inset: 0; display: grid; place-items: center; padding: 0 11%; pointer-events: none; }
+.narr p { margin: 0; text-align: center; font-size: clamp(17px, 1.55vw, 24px); line-height: 1.4; letter-spacing: -.02em; color: var(--ink); opacity: 0; transition: opacity .5s var(--ease-out); }
+.narr p.on { opacity: 1; }
+.cloud-bar { display: flex; justify-content: flex-end; margin-top: 6px; }
 
 .diagrams { display: grid; max-width: 1000px; margin: 0 auto; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 48px); align-items: start; }
 .dcard { border: 1px solid var(--hair); border-radius: 22px; padding: 22px 22px 14px; background: var(--surface); transition: border-color .4s, box-shadow .4s, transform .5s var(--ease-out); }
