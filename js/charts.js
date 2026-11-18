@@ -264,8 +264,8 @@ window.SLIDES = {};
   ];
   function curvesChart(el, steps, panels, { legendEl } = {}) {
     el.innerHTML = "";
-    const cols = 2, rows = Math.ceil(panels.length / cols);
-    const PW = 330, PH = 196, gap = 22, W = cols * PW + (cols - 1) * gap, H = rows * PH + (rows - 1) * gap + 24;
+    const cols = panels.length > 4 ? 3 : 2, rows = Math.ceil(panels.length / cols);
+    const PW = cols === 3 ? 262 : 330, PH = 196, gap = cols === 3 ? 18 : 22, W = cols * PW + (cols - 1) * gap, H = rows * PH + (rows - 1) * gap + 24;
     const svg = svgEl(el, W, H);
     const m = { l: 34, r: 8, t: 26, b: 24 };
     const id = `clip${Math.random().toString(36).slice(2, 8)}`;
@@ -594,7 +594,7 @@ window.SLIDES = {};
         document.getElementById("rlStat").textContent = pct(l, 1);
         document.getElementById("rlStatLbl").textContent = v === "goal"
           ? `mean success at 500k steps on 4 LIBERO-Goal tasks (Vanilla CFM ${pct(va, 1)})`
-          : `mean success at 500k steps on the 3 LIBERO-10 tasks shown (Vanilla CFM ${pct(va, 1)})`;
+          : `mean success at 500k steps on 5 LIBERO-10 tasks (Vanilla CFM ${pct(va, 1)})`;
         document.getElementById("rlCap").textContent = v === "goal"
           ? "Line: mean over 3 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs"
           : "Line: mean over 2 RL seeds · band: lowest to highest seed · 25 episodes per eval · Vanilla CFM: co-author's published runs";
