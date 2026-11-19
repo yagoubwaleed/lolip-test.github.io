@@ -509,6 +509,12 @@ window.SLIDES = {};
     async init() {
       cloud = cloud3D(document.getElementById("cloudCanvas"), await load("latent"), document.getElementById("narr"));
       document.getElementById("cloudReplay").addEventListener("click", () => cloud.start());
+      const cp = document.getElementById("codeCopy");
+      cp.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(document.querySelector(".code code").textContent); cp.textContent = "Copied"; }
+        catch (e) { cp.textContent = "Select and copy"; }
+        setTimeout(() => (cp.textContent = "Copy"), 1600);
+      });
     },
     async enter() { await load("latent"); cloud?.start(); },
     leave() { cloud?.stop(); },

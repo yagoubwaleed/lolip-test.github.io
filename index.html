@@ -49,8 +49,21 @@
         <span class="btn soon">Paper · soon</span>
         <button class="btn" id="cloudReplay">↺ Replay animation</button>
       </div>
+      <p class="tldr" data-a style="--d:5">A light regularizer in pretraining costs some base-policy success and makes finetuning in noise space far more effective.</p>
+      <figure class="code" data-a style="--d:6">
+        <figcaption><span>lolip.py</span><button class="copy" id="codeCopy">Copy</button></figcaption>
+<pre><code><span class="k">def</span> <span class="f">lolip_penalty</span>(v, x_t, t, obs, N=<span class="n">500</span>, T=<span class="n">50.0</span>):
+    s_min = T ** (-<span class="n">1</span> / N)                  <span class="c"># 0.99221</span>
+    u = torch.randn_like(x_t)
+    u = u / u.flatten(<span class="n">1</span>).norm(dim=<span class="n">1</span>).view(-<span class="n">1</span>, <span class="n">1</span>, <span class="n">1</span>)
+    step = <span class="k">lambda</span> x: x + v(x, t, obs) / N  <span class="c"># one Euler step</span>
+    _, Ju = jvp(step, x_t, u, create_graph=<span class="k">True</span>)
+    r = Ju.flatten(<span class="n">1</span>).norm(dim=<span class="n">1</span>)          <span class="c"># stretch along u</span>
+    <span class="k">return</span> <span class="n">0.5</span> * relu(s_min - r).mean()
+loss = cfm_loss + <span class="n">50</span> * lolip_penalty(v, x_t, t, obs)</code></pre>
+      </figure>
     </div>
-    <div class="fig" data-a style="--d:3">
+    <div class="fig" data-a style="--d:2">
       <div class="cloud"><canvas id="cloudCanvas"></canvas><div class="narr" id="narr"><p></p></div></div>
     </div>
   </section>
