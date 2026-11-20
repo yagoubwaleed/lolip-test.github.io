@@ -458,7 +458,7 @@ window.SLIDES = {};
       cv.style.opacity = (1 - 0.78 * dim).toFixed(3);
       cv.style.filter = dim > 0.01 ? `blur(${(2.2 * dim).toFixed(2)}px)` : "none";
       const m = sstep(e, MORPH[0], MORPH[1]);
-      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.4;
+      const cx = W / 2, cy = H / 2, R = Math.min(W, H) * (+cv.dataset.r || 0.4);   // data-r: radius as a fraction of the canvas
       const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
       for (let k = 0; k < paths.length; k++) paths[k] = new Path2D();
       for (let i = 0; i < N; i++) {
@@ -511,9 +511,8 @@ window.SLIDES = {};
       document.getElementById("cloudReplay").addEventListener("click", () => cloud.start());
       const cp = document.getElementById("codeCopy");
       cp.addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(document.querySelector(".code code").textContent); cp.textContent = "Copied"; }
-        catch (e) { cp.textContent = "Select and copy"; }
-        setTimeout(() => (cp.textContent = "Copy"), 1600);
+        try { await navigator.clipboard.writeText(document.querySelector(".code pre").textContent); cp.classList.add("done"); cp.title = "Copied"; } catch (e) {}
+        setTimeout(() => { cp.classList.remove("done"); cp.title = "Copy"; }, 1400);
       });
     },
     async enter() { await load("latent"); cloud?.start(); },
