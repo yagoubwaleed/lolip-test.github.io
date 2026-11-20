@@ -1,7 +1,10 @@
 // Horizontal slide deck: nav pill, arrows, keys, swipe, wheel, hash. Each slide can register hooks in
 // window.SLIDES[id] = { init(el), enter(el), leave(el), build(i) }; init runs once, on the first enter.
 // A slide with several .build figures shows one at a time: the arrows step through them before changing slide,
-// and a small step nav under the figure jumps between them (build(i) is called each time one is shown).
+// and tabs at the start of each figure header jump between them (build(i) is called each time one is shown).
+// Every figure header carries a progress line (.prog) that animations fill. When the shown animation has finished
+// (window.deckDone(el) from a slide or .build marked data-anim, otherwise shortly after it appears), the deck
+// points at what comes next: the next figure's tab, or the next-slide arrow.
 (() => {
   // ?shot: no transitions, for headless screenshots
   if (location.search.includes("shot")) { window.SHOT = true; document.documentElement.classList.add("shot"); }
@@ -26,24 +29,45 @@
   });
 
   const builds = (s) => [...s.querySelectorAll(".build")];
+  document.querySelectorAll(".fig-head").forEach((h) => h.insertAdjacentHTML("beforeend", '<div class="prog"><i></i></div>'));
   slides.forEach((s) => {
     const bs = builds(s);
     if (bs.length < 2) return;
-    const bn = document.createElement("div");
-    bn.className = "bnav";
-    bn.innerHTML = bs.map((b) => `<button><i></i>${b.dataset.label}</button>`).join("");
-    bn.querySelectorAll("button").forEach((x, k) => x.addEventListener("click", () => showBuild(s, k)));
-    s.querySelector(".tpl-body").appendChild(bn);
+    bs.forEach((b, j) => {
+      const tabs = document.createElement("div");
+      tabs.className = "seg tabs";
+      tabs.innerHTML = bs.map((o, k) => `<button aria-pressed="${k === j}">${o.dataset.label}</button>`).join("");
+      tabs.querySelectorAll("button").forEach((x, k) => x.addEventListener("click", () => showBuild(s, k)));
+      b.querySelector(".fig-title").replaceWith(tabs);
+    });
   });
   function showBuild(s, k) {
     const bs = builds(s);
     if (!bs.length) return;
+    uncue();
     s.dataset.b = k;
     bs.forEach((el, j) => (el.hidden = j !== k));
-    s.querySelectorAll(".bnav button").forEach((x, j) => x.setAttribute("aria-current", j === k));
     history.replaceState(null, "", "#" + s.id + (k ? ":" + k : ""));
     window.SLIDES?.[s.id]?.build?.(k);
+    if (!bs[k].hasAttribute("data-anim")) autoCue(bs[k]);
   }
+
+  // ---- next cue
+  let cueT = null;
+  function uncue() {
+    clearTimeout(cueT);
+    next.classList.remove("ready");
+    document.querySelectorAll(".tabs .cue").forEach((b) => b.classList.remove("cue"));
+  }
+  const autoCue = (el) => { clearTimeout(cueT); cueT = setTimeout(() => window.deckDone(el), window.SHOT ? 0 : 1800); };
+  window.deckUncue = uncue;
+  window.deckDone = (el) => {
+    const s = slides[cur];
+    if (!s || !(el === s || (s.contains(el) && !el.hidden))) return;    // finished somewhere no longer shown
+    const bs = builds(s), k = +(s.dataset.b ?? 0);
+    if (bs.length > 1 && k < bs.length - 1) bs[k].querySelectorAll(".tabs button")[k + 1].classList.add("cue");
+    else if (cur < slides.length - 1) next.classList.add("ready");
+  };
   // arrows, keys, swipe and wheel: next build of this slide first, then the next slide
   function step(d) {
     const s = slides[cur], n = builds(s).length, k = +(s.dataset.b ?? 0);
@@ -64,6 +88,7 @@
     if (i === cur) return;
     const dir = i > cur ? "next" : "prev";
     const old = slides[cur];
+    uncue();
     if (old) { old.classList.remove("active"); window.SLIDES?.[old.id]?.leave?.(old); }
     cur = i;
     const s = slides[i];
@@ -75,13 +100,14 @@
     placePill();
     prev.disabled = i === 0;
     next.disabled = i === slides.length - 1;
-    if (i > 0) { next.classList.remove("pulse"); document.getElementById("hint").style.opacity = 0; }
+    if (i > 0) document.getElementById("hint").style.opacity = 0;
     const btn = dir === "next" ? next : prev;
     if (!opts.silent) { btn.classList.remove("go"); void btn.offsetWidth; btn.classList.add("go"); }
     history.replaceState(null, "", "#" + s.id);
     const hooks = window.SLIDES?.[s.id], n = builds(s).length;
     const k = opts.build ?? (opts.fromEnd ? Math.max(0, n - 1) : 0);
-    if (n) { s.dataset.b = k; builds(s).forEach((el, j) => (el.hidden = j !== k)); s.querySelectorAll(".bnav button").forEach((x, j) => x.setAttribute("aria-current", j === k)); }
+    if (n) { s.dataset.b = k; builds(s).forEach((el, j) => (el.hidden = j !== k)); }
+    else if (!s.hasAttribute("data-anim")) autoCue(s);
     if (hooks) {
       if (!inited.has(s.id)) { inited.add(s.id); hooks.init?.(s); }
       // let the track move first, then play the slide's animation

@@ -39,7 +39,7 @@
 <main class="deck"><div class="track" id="track">
 
   <!-- 01 -->
-  <section class="slide title-slide" id="intro" data-title="Intro">
+  <section class="slide title-slide" data-anim id="intro" data-title="Intro">
     <div class="col">
       <h1 data-a style="--d:1">Lipschitz-Regularized <b>Pretraining</b> <br>for <b>Efficient</b> Downstream Finetuning</h1>
       <div class="people">
@@ -80,27 +80,29 @@
 loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <span class="c"># add to CFM loss</span></code></pre>
       </figure>
     </div>
-    <div class="fig" data-a style="--d:2"><div class="cloud"><canvas id="cloudCanvas" data-r="0.47"></canvas><div class="narr" id="narr"><p></p></div></div></div>
+    <div class="fig" data-a style="--d:2"><div class="cloud"><canvas id="cloudCanvas" data-r="0.47"></canvas><div class="narr" id="narr"><p></p></div></div><div class="prog"><i></i></div></div>
   </section>
 
   <!-- 02 -->
-  <section class="slide full" id="setting" data-title="Setting">
+  <section class="slide full" data-anim id="setting" data-title="Setting">
     <div class="setting-wrap">
       <h2 class="one-line" data-a style="--d:1;text-align:center">We want to finetune flow policies <b>without touching the weights</b>.</h2>
       <div class="diagrams">
         <div class="dcard" data-a style="--d:2">
-          <button class="dplay" aria-label="Play the walk-through"><svg viewBox="0 0 12 12" width="10" height="10"><path d="M2.5 1.2v9.6L10.5 6z" fill="currentColor"/></svg>Play</button>
+          <button class="sbtn dplay" aria-label="Replay the walk-through">Replay ↺</button>
           <h3>DSRL <span>· noise steering via RL</span></h3>
           <a class="ref" href="https://arxiv.org/abs/2506.15799" target="_blank" rel="noopener">Wagenmaker et al., 2025 ↗</a>
           <div id="dgDSRL"></div>
           <p class="dstep" aria-live="polite"></p>
+          <div class="prog"><i></i></div>
         </div>
         <div class="dcard" data-a style="--d:3">
-          <button class="dplay" aria-label="Play the walk-through"><svg viewBox="0 0 12 12" width="10" height="10"><path d="M2.5 1.2v9.6L10.5 6z" fill="currentColor"/></svg>Play</button>
+          <button class="sbtn dplay" aria-label="Replay the walk-through">Replay ↺</button>
           <h3>DSBC <span>· noise steering via inverted demos</span></h3>
           <a class="ref" href="https://arxiv.org/abs/2606.13675" target="_blank" rel="noopener">Tang et al., 2026 ↗</a>
           <div id="dgDSBC"></div>
           <p class="dstep" aria-live="polite"></p>
+          <div class="prog"><i></i></div>
         </div>
         <p class="problem" data-a style="--d:5"><b>Problem:</b> both work <span class="pk">inefficiently</span>.</p>
       </div>
@@ -115,7 +117,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
         <p class="lede" data-a style="--d:3">In the animation, we pick 8 noises that are far apart in the latent space and run the standard flow policy (Vanilla CFM) from each. The 8 resulting actions are nearly identical, and so are the robot's motions.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Action spread">
+      <div class="build" data-anim data-label="Action spread">
         <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
         <div class="fig-main"><div id="sceneSpreadV" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
@@ -138,8 +140,8 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
         <p class="lede" data-a style="--d:3">We provide both a visualization of how this appears in the noise and action spaces when learning a noise policy with DSBC, and an explicit measure of the reverse singular values, which shows the high expansion.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Noise policy">
-        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button></span></div>
+      <div class="build" data-anim data-label="Noise policy">
+        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
         <div class="fig-main"><div id="sceneInfV" class="scene-host"></div></div>
         <p class="scene-status" data-status></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
@@ -162,8 +164,8 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
         <div class="eq-small" data-a style="--d:4" id="eqStep"></div>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Singular values of ∂a/∂z">
-        <div class="fig-head"><span class="fig-title">Singular values of ∂a/∂z</span><span class="fig-ctl"><span class="morph"><button class="play" id="morphPlay" aria-label="Replay"><svg width="12" height="12" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg></button><span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span></span></span></div>
+      <div class="build" data-anim data-label="Singular values of ∂a/∂z">
+        <div class="fig-head"><span class="fig-title">Singular values of ∂a/∂z</span><span class="fig-ctl"><span class="morph"><button class="sbtn" id="morphPlay">Replay ↺</button><span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span></span></span></div>
         <div class="fig-main"><div id="histMorph" class="chart-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Drag to move from Vanilla CFM to LoLip · Isaac Lab, 3 training seeds · both end points are measured; the frames in between are interpolated</div>
@@ -179,7 +181,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
         <p class="lede" data-a style="--d:3">On LIBERO-Goal, sampling 256 noises at a fixed robot state, LoLip's action standard deviation is <span id="spreadRange">1.95–2.12</span> times that of Vanilla CFM on each of the 4 tasks.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Action spread">
+      <div class="build" data-anim data-label="Action spread">
         <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneSpreadL" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
@@ -201,8 +203,8 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
         <p class="lede" data-a style="--d:2">With LoLip, the Pick Mug noises form their own region. The noise policy fit to them samples a mug noise, and the robot reaches for the mug.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Noise policy">
-        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn solid" data-learn><span class="k">1</span> Learn noise policy</button><button class="sbtn" data-infer disabled><span class="k">2</span> Run inference</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
+      <div class="build" data-anim data-label="Noise policy">
+        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneInfL" class="scene-host"></div></div>
         <p class="scene-status" data-status></p>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
@@ -296,7 +298,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
 </div></main>
 
 <button class="arrow prev" id="prev" aria-label="Previous slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
-<button class="arrow next pulse" id="next" aria-label="Next slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+<button class="arrow next" id="next" aria-label="Next slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
 <div class="hint" id="hint">Use <kbd>←</kbd> <kbd>→</kbd> or the arrows</div>
 <div class="tip" id="tip"></div>
 </body>

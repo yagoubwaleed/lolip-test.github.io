@@ -33,6 +33,16 @@ window.SLIDES = {};
     return () => cancelAnimationFrame(raf);
   }
 
+  // progress line (.prog) of a figure header or card: fills over `sec` seconds and stays full when finished
+  function prog(root) {
+    const i = root.querySelector(".prog i");
+    const to = (x, sec) => { if (!i) return; i.style.transition = "none"; i.style.transform = "scaleX(0)"; i.getBoundingClientRect();
+      i.style.transition = sec ? `transform ${sec}s linear` : "none"; i.style.transform = `scaleX(${x})`; };
+    return { run: (sec) => to(1, window.SHOT ? 0 : sec), reset: () => to(0, 0) };
+  }
+  const done = (el) => window.deckDone?.(el);
+  const uncue = () => window.deckUncue?.();
+
   function svgEl(el, W, H) {
     return d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("preserveAspectRatio", "xMidYMid meet");
   }
@@ -338,10 +348,10 @@ window.SLIDES = {};
     "At test time, its noise <i>w′</i> runs through the flow to <i>a</i>.",
     "The robot acts; the flow's weights never change.",
   ];
-  // play button: dims the diagram, then lights each step's pieces in order, draws its arrows, runs a dot along them,
+  // walk-through: dims the diagram, then lights each step's pieces in order, draws its arrows, runs a dot along them,
   // and shows the step's sentence below the diagram; at the end everything is lit again
-  function walkthrough(card, steps) {
-    const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay");
+  function walkthrough(card, steps, onReplay) {
+    const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay"), bar = prog(card);
     const STEP = 2.8;
     let timers = [], rafs = [];
     const later = (sec, fn) => timers.push(setTimeout(fn, sec * 1000));
@@ -385,17 +395,18 @@ window.SLIDES = {};
       svg.classList.remove("playing");
       svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past"));
       svg.querySelectorAll(".d-draw").forEach((el) => { el.style.transition = ""; el.style.strokeDashoffset = ""; });
-      btn.classList.remove("on");
-      if (!keepCaption) { cap.innerHTML = ""; cap.style.opacity = 1; }
+      if (!keepCaption) { cap.innerHTML = ""; cap.style.opacity = 1; bar.reset(); }
     }
-    btn.addEventListener("click", () => {
+    function play(then) {
       reset(true);
-      btn.classList.add("on");
       svg.classList.add("playing");
+      const total = 0.35 + steps.length * STEP;
+      bar.run(total);
       steps.forEach((_, i) => later(0.35 + i * STEP, () => light(i + 1)));
-      later(0.35 + steps.length * STEP, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); btn.classList.remove("on"); cap.style.opacity = 0; });
-    });
-    return { reset: () => reset(false) };
+      later(total, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); cap.style.opacity = 0; then?.(); });
+    }
+    btn.addEventListener("click", () => { uncue(); play(onReplay); });
+    return { play, reset: () => reset(false) };
   }
 
   // ------------------------------------------------------------ intro: rotating 3D noise space, narrated
@@ -489,7 +500,7 @@ window.SLIDES = {};
   // ------------------------------------------------------------ segmented toggle
   function seg(el, onChange) {
     const knob = el.querySelector(".knob"), bs = [...el.querySelectorAll("button")];
-    const place = (b) => { knob.style.width = b.offsetWidth + "px"; knob.style.transform = `translateX(${b.offsetLeft - 3}px)`; };
+    const place = (b) => { knob.style.width = b.offsetWidth + "px"; knob.style.transform = `translateX(${b.offsetLeft}px)`; };
     bs.forEach((b) => b.addEventListener("click", () => {
       if (b.getAttribute("aria-pressed") === "true") return;
       bs.forEach((o) => o.setAttribute("aria-pressed", o === b));
@@ -508,24 +519,32 @@ window.SLIDES = {};
   SLIDES.intro = {
     async init() {
       cloud = cloud3D(document.getElementById("cloudCanvas"), await load("latent"), document.getElementById("narr"));
-      document.getElementById("cloudReplay").addEventListener("click", () => cloud.start());
+      document.getElementById("cloudReplay").addEventListener("click", () => SLIDES.intro.play());
       const cp = document.getElementById("codeCopy");
       cp.addEventListener("click", async () => {
         try { await navigator.clipboard.writeText(document.querySelector(".code pre").textContent); cp.classList.add("done"); cp.title = "Copied"; } catch (e) {}
         setTimeout(() => { cp.classList.remove("done"); cp.title = "Copy"; }, 1400);
       });
     },
-    async enter() { await load("latent"); cloud?.start(); },
-    leave() { cloud?.stop(); },
+    async enter() { await load("latent"); this.play(); },
+    play() {
+      const s = document.getElementById("intro"), end = NARRATION[NARRATION.length - 1][0] + 0.6;
+      cloud?.start(); uncue(); clearTimeout(this.t);
+      prog(s).run(end);
+      this.t = setTimeout(() => done(s), window.SHOT ? 0 : end * 1000);
+    },
+    leave() { cloud?.stop(); clearTimeout(this.t); prog(document.getElementById("intro")).reset(); },
   };
 
   let wDSRL, wDSBC;
   SLIDES.setting = {
     init() {
       document.getElementById("dgDSRL").innerHTML = dsrlSVG(); document.getElementById("dgDSBC").innerHTML = dsbcSVG();
-      wDSRL = walkthrough(document.getElementById("dgDSRL").closest(".dcard"), DSRL_STEPS);
-      wDSBC = walkthrough(document.getElementById("dgDSBC").closest(".dcard"), DSBC_STEPS);
+      const s = document.getElementById("setting"), fin = () => done(s);
+      wDSRL = walkthrough(document.getElementById("dgDSRL").closest(".dcard"), DSRL_STEPS, fin);
+      wDSBC = walkthrough(document.getElementById("dgDSBC").closest(".dcard"), DSBC_STEPS, fin);
     },
+    enter() { wDSRL.play(() => wDSBC.play(() => done(document.getElementById("setting")))); },
     leave() { wDSRL.reset(); wDSBC.reset(); },
   };
 
@@ -552,58 +571,58 @@ window.SLIDES = {};
   }
   // action spread: plays on its own, with replay and an optional Vanilla / LoLip switch
   function spreadWidget(hostId, initial) {
-    const host = document.getElementById(hostId), bar = host.closest(".build").querySelector(".fig-head");
+    const host = document.getElementById(hostId), fig = host.closest(".build"), bar = fig.querySelector(".fig-head"), line = prog(fig);
     const get = scenePool(host, "spread");
     let p = initial, cur = null;
-    const run = async () => { cur = await get(p); cur.t = 0; cur.play(0, cur.end, cur.sc.clock.speedup); };
+    const run = async () => {
+      uncue(); cur?.stop(); cur = await get(p); cur.t = 0;
+      const v = cur.sc.clock.speedup;
+      line.run(cur.end / v);
+      cur.play(0, cur.end, v, () => done(fig));
+    };
     bar.querySelector("[data-replay]").addEventListener("click", run);
     const ps = bar.querySelector("[data-policy]");
     if (ps) seg(ps, (v) => { p = v; run(); });
-    return { run, stop: () => cur?.stop() };
+    return { run, stop: () => { cur?.stop(); line.reset(); } };
   }
-  // noise policy demo: (1) invert the demonstrations and fit the noise policy, (2) sample from it for "pick the mug"
+  // noise policy demo, played through on its own: invert the demonstrations and fit the noise policy,
+  // then sample from it for "pick the mug" and roll out; a one-line subtitle follows each stage
   function inferenceWidget(hostId, initial) {
     const host = document.getElementById(hostId), fig = host.closest(".build"), bar = fig.querySelector(".fig-head");
-    const bL = bar.querySelector("[data-learn]"), bI = bar.querySelector("[data-infer]"), st = fig.querySelector("[data-status]");
+    const st = fig.querySelector("[data-status]"), line = prog(fig);
     const get = scenePool(host, "inference");
-    let p = initial, cur = null, timers = [];
+    const SPARKLE = 2.3;
+    let p = initial, cur = null, timers = [], run_id = 0;
     const later = (sec, fn) => timers.push(setTimeout(fn, (sec * 1000) / cur.sc.clock.speedup));
     const clear = () => { timers.forEach(clearTimeout); timers = []; };
-    const reset = async () => {
-      clear(); cur?.stop();
+    const say = (txt) => { st.style.opacity = 0; setTimeout(() => { st.textContent = txt; st.style.opacity = 1; }, window.SHOT ? 0 : 200); };
+    const stop = () => { run_id++; clear(); cur?.stop(); line.reset(); st.textContent = ""; };
+    async function run() {
+      stop(); uncue();
+      const id = run_id;
       cur = await get(p);
+      if (id !== run_id) return;
       cur.showTarget = false; cur.t = 0; cur.draw(0);
-      bL.disabled = false; bI.disabled = true; bL.classList.add("solid"); bI.classList.remove("solid");
-      st.textContent = "";
-    };
-    const learn = (then) => {
-      clear(); bL.disabled = bI.disabled = true; cur.showTarget = false;
-      const v = cur.sc.clock.speedup;
-      st.textContent = "Mapping 240 demonstrations back through the flow to their noises…";
+      const v = cur.sc.clock.speedup, t1 = cur.T0 + 1.3, mug = cur.sc.noise_points[cur.sc.selected].task === "mugplace";
+      line.run(cur.end / v + SPARKLE);
+      say("Mapping 240 demonstrations back through the flow to their noises…");
       cur.play(0, 2.6, v, () => {
-        st.textContent = "Fitting a noise policy to the noises of the Pick Mug demonstrations…";
-        cur.sparkle(2.6, 2.3, () => cur.play(2.6, cur.T0 + 1.3, v, () => {
-          st.textContent = "Noise policy learned: the dotted circle is where it samples for “pick the mug”.";
-          bL.disabled = false; bL.classList.remove("solid"); bI.disabled = false; bI.classList.add("solid");
-          then?.();
+        say("Fitting a noise policy to the noises of the Pick Mug demonstrations…");
+        cur.sparkle(2.6, SPARKLE, () => cur.play(2.6, t1, v, () => {
+          cur.showTarget = true;
+          say("Target: pick the mug. Sampling a noise from the noise policy…");
+          later(2.6 - 1.3 + 0.3, () => say(`The sampled noise is a ${mug ? "Pick Mug" : "Pick Bowl"} noise. Rolling out…`));
+          cur.play(t1, cur.end, v, () => {
+            say(mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.");
+            done(fig);
+          });
         }));
       });
-    };
-    const infer = () => {
-      clear(); bL.disabled = bI.disabled = true; cur.showTarget = true;
-      const t0 = cur.T0 + 1.3, mug = cur.sc.noise_points[cur.sc.selected].task === "mugplace";
-      st.textContent = "Target: pick the mug. Sampling a noise from the noise policy…";
-      later(2.6 - 1.3 + 0.3, () => (st.textContent = `The sampled noise is a ${mug ? "Pick Mug" : "Pick Bowl"} noise. Rolling out…`));
-      cur.play(t0, cur.end, cur.sc.clock.speedup, () => {
-        st.textContent = mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.";
-        bL.disabled = false; bI.disabled = false;
-      });
-    };
-    bL.addEventListener("click", () => learn());
-    bI.addEventListener("click", infer);
+    }
+    bar.querySelector("[data-replay]").addEventListener("click", run);
     const ps = bar.querySelector("[data-policy]");
-    if (ps) seg(ps, async (v) => { p = v; await reset(); });
-    return { reset, stop: () => { clear(); cur?.stop(); }, demo: () => learn(infer) };
+    if (ps) seg(ps, (v) => { p = v; run(); });
+    return { run, stop };
   }
   let wContr, hF;
   SLIDES.contraction = {
@@ -627,11 +646,7 @@ window.SLIDES = {};
       expH.set([{ key: "v", share: d.vanilla.share, color: "var(--hist-grey)", label: "Vanilla CFM", labelColor: C.ink }]);
     },
     async enter() { await load("singular_values"); },
-    async build(k) {
-      if (k === 1) { wExp.stop(); return expH.play(); }
-      await wExp.reset();
-      if (window.SHOT) wExp.demo();
-    },
+    build(k) { if (k === 1) { wExp.stop(); expH.play(); } else wExp.run(); },
     leave() { wExp.stop(); },
   };
 
@@ -664,11 +679,16 @@ window.SLIDES = {};
       };
       const range = document.getElementById("morphRange");
       range.addEventListener("input", () => { morphStop(); set(range.value / 1000); hM.draw(1); });
+      const fig = range.closest(".build"), line = prog(fig);
       this.run = () => {
-        morphStop();
+        morphStop(); uncue();
         range.value = 0; set(0); hM.play(1200);
-        morphStop = tween(2200, (k) => { const t = d3.easeCubicInOut(k); range.value = t * 1000; set(t); hM.draw(1); }, 1700);
+        line.run(3.9);
+        const stopT = tween(2200, (k) => { const t = d3.easeCubicInOut(k); range.value = t * 1000; set(t); hM.draw(1); }, 1700);
+        const fin = setTimeout(() => done(fig), window.SHOT ? 0 : 3900);
+        morphStop = () => { stopT(); clearTimeout(fin); };
       };
+      range.addEventListener("input", () => line.reset());
       document.getElementById("morphPlay").addEventListener("click", () => this.run());
       addEventListener("themechange", () => { set(range.value / 1000); hM.draw(1); });
     },
@@ -696,7 +716,7 @@ window.SLIDES = {};
   let wSep;
   SLIDES.separation = {
     init() { wSep = inferenceWidget("sceneInfL", "lolip"); },
-    async build() { await wSep.reset(); if (window.SHOT) wSep.demo(); },
+    build() { wSep.run(); },
     leave() { wSep.stop(); },
   };
 
