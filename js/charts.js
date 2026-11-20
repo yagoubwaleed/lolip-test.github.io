@@ -405,7 +405,7 @@ window.SLIDES = {};
       later(total, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); cap.style.opacity = 0; then?.(); });
     }
     // the play button pulses until it is first clicked, then becomes a replay button
-    btn.addEventListener("click", () => { btn.classList.remove("cue"); btn.textContent = "Replay ↺"; uncue(); play(onReplay); });
+    btn.addEventListener("click", () => { btn.classList.remove("cue"); btn.innerHTML = 'Replay <i class="ic rep"></i>'; uncue(); play(onReplay); });
     return { play, reset: () => reset(false) };
   }
 

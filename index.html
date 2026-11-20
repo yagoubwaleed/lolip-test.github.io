@@ -28,7 +28,7 @@
   <span></span>
   <ol id="navList"><span class="pill" id="navPill"></span></ol>
   <div class="nav-r">
-  <span class="nbtn off" id="paperTop" aria-disabled="true">Paper ↗</span>
+  <span class="nbtn off" id="paperTop" aria-disabled="true">Paper <i class="ic out"></i></span>
   <button class="theme" id="themeBtn" aria-label="Switch light / dark mode">
     <svg class="sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.8v2.2M10 16v2.2M1.8 10H4M16 10h2.2M4.2 4.2l1.6 1.6M14.2 14.2l1.6 1.6M4.2 15.8l1.6-1.6M14.2 5.8l1.6-1.6"/></svg>
     <svg class="moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M16.5 12.4A7 7 0 0 1 7.6 3.5a7 7 0 1 0 8.9 8.9z"/></svg>
@@ -61,10 +61,10 @@
         </div>
       </div>
       <div class="links" data-a style="--d:4">
-        <a class="btn solid" href="#setting" data-go="1">Start the story →</a>
-        <span class="btn off" aria-disabled="true">Paper ↗</span>
-        <span class="btn off" id="codeDemo" aria-disabled="true">Code demo ↗</span>
-        <button class="btn" id="cloudReplay">Replay animation ↺</button>
+        <a class="btn solid" href="#setting" data-go="1">Start the story <i class="ic go"></i></a>
+        <span class="btn off" aria-disabled="true">Paper <i class="ic out"></i></span>
+        <span class="btn off" id="codeDemo" aria-disabled="true">Code demo <i class="ic out"></i></span>
+        <button class="btn" id="cloudReplay">Replay animation <i class="ic rep"></i></button>
       </div>
       <p class="tldr" data-a style="--d:5">We propose a light regularizer for flow pretraining that widens action spread and smooths the latent space, trading some base performance for strong finetuning.</p>
       <figure class="code" data-a style="--d:6">
@@ -89,16 +89,16 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <h2 class="one-line" data-a style="--d:1;text-align:center">We want to finetune flow policies <b>without touching the weights</b>.</h2>
       <div class="diagrams">
         <div class="dcard" data-a style="--d:2">
-          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play ▸</button>
+          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play <i class="ic play"></i></button>
           <h3>DSRL <span>· noise steering via RL</span></h3>
-          <a class="ref" href="https://arxiv.org/abs/2506.15799" target="_blank" rel="noopener">Wagenmaker et al., 2025 ↗</a>
+          <a class="ref" href="https://arxiv.org/abs/2506.15799" target="_blank" rel="noopener">Wagenmaker et al., 2025 <i class="ic out"></i></a>
           <div id="dgDSRL"></div>
           <p class="dstep" aria-live="polite"></p>
         </div>
         <div class="dcard" data-a style="--d:3">
-          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play ▸</button>
+          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play <i class="ic play"></i></button>
           <h3>DSBC <span>· noise steering via inverted demos</span></h3>
-          <a class="ref" href="https://arxiv.org/abs/2606.13675" target="_blank" rel="noopener">Tang et al., 2026 ↗</a>
+          <a class="ref" href="https://arxiv.org/abs/2606.13675" target="_blank" rel="noopener">Tang et al., 2026 <i class="ic out"></i></a>
           <div id="dgDSBC"></div>
           <p class="dstep" aria-live="polite"></p>
         </div>
@@ -116,7 +116,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-anim data-label="Action spread">
-        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
+        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button></span></div>
         <div class="fig-main"><div id="sceneSpreadV" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk and the noise it maps back to through the flow · the 8 far-apart noises and the drawing scale are chosen for illustration · robot: the 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)</div>
@@ -139,7 +139,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-anim data-label="Noise policy">
-        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
+        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button></span></div>
         <div class="fig-main"><div id="sceneInfV" class="scene-host"></div></div>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
@@ -162,7 +162,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-anim data-label="Singular values of ∂a/∂z">
-        <div class="fig-head"><span class="fig-title">Singular values of ∂a/∂z</span><span class="fig-ctl"><span class="morph"><button class="sbtn" id="morphPlay">Replay ↺</button><span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span></span></span></div>
+        <div class="fig-head"><span class="fig-title">Singular values of ∂a/∂z</span><span class="fig-ctl"><span class="morph"><button class="sbtn" id="morphPlay">Replay <i class="ic rep"></i></button><span class="end">Vanilla CFM</span><input type="range" id="morphRange" min="0" max="1000" value="0" aria-label="Vanilla to LoLip"><span class="end l">LoLip</span></span></span></div>
         <div class="fig-main"><div id="histMorph" class="chart-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Drag to move from Vanilla CFM to LoLip · Isaac Lab, 3 training seeds · both end points are measured; the frames in between are interpolated</div>
@@ -179,7 +179,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-anim data-label="Action spread">
-        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
+        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneSpreadL" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · the same 8 far-apart noises for both policies; the noises and the drawing scale are chosen for illustration · robot: 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)</div>
@@ -201,7 +201,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-anim data-label="Noise policy">
-        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
+        <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneInfL" class="scene-host"></div></div>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
