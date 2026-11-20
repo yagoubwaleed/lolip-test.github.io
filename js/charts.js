@@ -584,38 +584,26 @@ window.SLIDES = {};
     return { run, stop: () => { cur?.stop(); line.reset(); } };
   }
   // noise policy demo, played through on its own: invert the demonstrations and fit the noise policy,
-  // then sample from it for "pick the mug" and roll out; a one-line subtitle follows each stage
+  // then sample from it for "pick the mug" and roll out
   function inferenceWidget(hostId, initial) {
     const host = document.getElementById(hostId), fig = host.closest(".build"), bar = fig.querySelector(".fig-head");
-    const st = fig.querySelector("[data-status]"), line = prog(fig);
+    const line = prog(fig);
     const get = scenePool(host, "inference");
     const SPARKLE = 2.3;
-    let p = initial, cur = null, timers = [], run_id = 0;
-    const later = (sec, fn) => timers.push(setTimeout(fn, (sec * 1000) / cur.sc.clock.speedup));
-    const clear = () => { timers.forEach(clearTimeout); timers = []; };
-    // one numbered sentence per stage, as in the Setting walk-throughs
-    const say = (k, html) => { st.style.opacity = 0; setTimeout(() => { st.innerHTML = `<span class="n">${k} / 5</span>${html}`; st.style.opacity = 1; }, window.SHOT ? 0 : 200); };
-    const stop = () => { run_id++; clear(); cur?.stop(); line.reset(); st.textContent = ""; };
+    let p = initial, cur = null, run_id = 0;
+    const stop = () => { run_id++; cur?.stop(); line.reset(); };
     async function run() {
       stop(); uncue();
       const id = run_id;
       cur = await get(p);
       if (id !== run_id) return;
       cur.showTarget = false; cur.t = 0; cur.draw(0);
-      const v = cur.sc.clock.speedup, t1 = cur.T0 + 1.3, mug = cur.sc.noise_points[cur.sc.selected].task === "mugplace";
-      const task = mug ? "Pick Mug" : "Pick Bowl";
+      const v = cur.sc.clock.speedup, t1 = cur.T0 + 1.3;
       line.run(cur.end / v + SPARKLE);
-      say(1, "Invert the frozen flow: each demonstration action gives its noise.");
       cur.play(0, 2.6, v, () => {
-        say(2, "Train the noise policy on the Pick Mug noises.");
         cur.sparkle(2.6, SPARKLE, () => cur.play(2.6, t1, v, () => {
           cur.showTarget = true;
-          say(3, "Target: pick the mug. The noise policy samples a noise <i>w′</i>.");
-          later(2.6 - 1.3 + 0.3, () => say(4, `The sampled noise <i>w′</i> lies among the ${task} noises, so the flow gives a ${task} action <i>a</i>.`));
-          cur.play(t1, cur.end, v, () => {
-            say(5, mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.");
-            done(fig);
-          });
+          cur.play(t1, cur.end, v, () => done(fig));
         }));
       });
     }

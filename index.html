@@ -141,7 +141,6 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <div class="build" data-anim data-label="Noise policy">
         <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
         <div class="fig-main"><div id="sceneInfV" class="scene-host"></div></div>
-        <p class="dstep" data-status aria-live="polite"></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
       <div class="build" data-label="Singular values" hidden>
@@ -204,7 +203,6 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <div class="build" data-anim data-label="Noise policy">
         <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneInfL" class="scene-host"></div></div>
-        <p class="dstep" data-status aria-live="polite"></p>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
     </div>
