@@ -25,11 +25,15 @@
 <body>
 
 <header class="nav">
+  <span></span>
   <ol id="navList"><span class="pill" id="navPill"></span></ol>
+  <div class="nav-r">
+  <span class="nbtn off" id="paperTop" aria-disabled="true">Paper ↗</span>
   <button class="theme" id="themeBtn" aria-label="Switch light / dark mode">
     <svg class="sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.8v2.2M10 16v2.2M1.8 10H4M16 10h2.2M4.2 4.2l1.6 1.6M14.2 14.2l1.6 1.6M4.2 15.8l1.6-1.6M14.2 5.8l1.6-1.6"/></svg>
     <svg class="moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M16.5 12.4A7 7 0 0 1 7.6 3.5a7 7 0 1 0 8.9 8.9z"/></svg>
   </button>
+  </div>
 </header>
 
 <main class="deck"><div class="track" id="track">
@@ -58,9 +62,9 @@
       </div>
       <div class="links" data-a style="--d:4">
         <a class="btn solid" href="#setting" data-go="1">Start the story →</a>
-        <span class="btn soon">Paper · soon</span>
-        <a class="btn" id="codeDemo" href="#" target="_blank" rel="noopener">Code demo ↗</a>
-        <button class="btn" id="cloudReplay">↺ Replay animation</button>
+        <span class="btn off" aria-disabled="true">Paper ↗</span>
+        <span class="btn off" id="codeDemo" aria-disabled="true">Code demo ↗</span>
+        <button class="btn" id="cloudReplay">Replay animation ↺</button>
       </div>
       <p class="tldr" data-a style="--d:5">We propose a light regularizer for flow pretraining that widens action spread and smooths the latent space, trading some base performance for strong finetuning.</p>
       <figure class="code" data-a style="--d:6">
@@ -112,7 +116,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-label="Action spread">
-        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>↺ Replay</button></span></div>
+        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
         <div class="fig-main"><div id="sceneSpreadV" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk and the noise it maps back to through the flow · the 8 far-apart noises and the drawing scale are chosen for illustration · robot: the 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)</div>
@@ -176,7 +180,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </header>
     <div class="tpl-body" data-a style="--d:4">
       <div class="build" data-label="Action spread">
-        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>↺ Replay</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
+        <div class="fig-head"><span class="fig-title">Action spread</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneSpreadL" class="scene-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · the same 8 far-apart noises for both policies; the noises and the drawing scale are chosen for illustration · robot: 8 rollouts of the base policy, one fixed noise each, overlaid (held-out scene 24)</div>

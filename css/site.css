@@ -90,11 +90,11 @@ b, strong { font-weight: 600; }
 /* ------------------------------------------------------------------ nav */
 .nav {
   position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 20;
-  display: flex; align-items: center; gap: 28px; padding: 0 28px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr); align-items: center; gap: 20px; padding: 0 22px;
   background: var(--nav-bg); backdrop-filter: saturate(1.4) blur(14px);
 }
 .nav ol {
-  position: relative; display: flex; gap: 2px; margin: 0 auto; padding: 0; list-style: none;
+  position: relative; display: flex; gap: 2px; margin: 0; padding: 0; list-style: none; min-width: 0;
   overflow-x: auto; scrollbar-width: none;
 }
 .nav ol::-webkit-scrollbar { display: none; }
@@ -112,8 +112,12 @@ b, strong { font-weight: 600; }
   position: absolute; z-index: 0; top: 0; left: 0; height: 100%; border-radius: 999px; background: var(--ink);
   transition: transform .7s var(--ease), width .7s var(--ease);
 }
+/* right end of the nav: paper link and theme toggle, centred on the same line as the slide titles */
+.nav-r { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.nbtn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--hair); background: var(--surface); font-size: 13px; color: var(--ink); text-decoration: none; white-space: nowrap; transition: border-color .3s; }
+.nbtn:hover { border-color: var(--ink); }
 .theme {
-  position: absolute; right: 22px; top: 50%; margin-top: -18px; width: 36px; height: 36px; border-radius: 50%;
+  position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%;
   border: 1px solid var(--hair); background: var(--surface); color: var(--ink); cursor: pointer;
   display: grid; place-items: center; transition: border-color .3s, background .3s, color .3s;
 }
@@ -276,7 +280,7 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 .btn:hover { border-color: var(--ink); }
 .btn.solid { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .btn.solid:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
-.btn.soon { color: var(--faint); pointer-events: none; }
+.btn.off, .nbtn.off { color: var(--faint); pointer-events: none; }   /* links that are not available yet */
 /* intro: every block of the left column is one width (--w), blocks are --gap apart, text is the title or 14px;
    the cloud column has the same width and height */
 .slide.title-slide { --w: 540px; --gap: 26px; grid-template-columns: var(--w) minmax(380px, var(--w)); justify-content: center; align-items: stretch; align-content: center; gap: clamp(48px, 5vw, 96px); padding-left: clamp(64px, 6vw, 180px); padding-right: clamp(64px, 6vw, 180px); }
@@ -380,8 +384,7 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
   .rw-pair { grid-template-columns: 1fr; width: 100%; }
   .fig-head { flex-wrap: wrap; }
   :root { --nav-h: 56px; }
-  .nav { gap: 14px; padding: 0 60px 0 14px; }
-  .theme { right: 12px; }
+  .nav { grid-template-columns: 0 minmax(0, 1fr) auto; gap: 10px; padding: 0 12px 0 14px; }
   .slide, .slide.wide { grid-template-columns: minmax(0, 1fr); align-content: start; overflow-y: auto; padding: 28px 16px 96px; gap: 26px; }
   .wide .head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .diagrams { grid-template-columns: 1fr; }
