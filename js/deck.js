@@ -85,7 +85,7 @@
     if (hooks) {
       if (!inited.has(s.id)) { inited.add(s.id); hooks.init?.(s); }
       // let the track move first, then play the slide's animation
-      setTimeout(async () => { if (slides[cur] !== s) return; await hooks.enter?.(s); if (n && slides[cur] === s) showBuild(s, k); }, opts.silent ? 150 : 520);
+      setTimeout(async () => { if (slides[cur] !== s) return; await hooks.enter?.(s); if (n && slides[cur] === s) showBuild(s, k); }, opts.silent ? 150 : 330);
     }
   }
   window.goSlide = go;
@@ -126,7 +126,7 @@
     if (Math.abs(d) < 18 || lock) return;
     lock = true;
     step(d > 0 ? 1 : -1);
-    setTimeout(() => (lock = false), 1100);
+    setTimeout(() => (lock = false), 750);
   }, { passive: true });
 
   window.addEventListener("resize", () => cur >= 0 && placePill());
