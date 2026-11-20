@@ -157,8 +157,24 @@ window.Scenes = (() => {
       }
       if (aEnd > 0) {
         const col = ok ? this.T.pink : this.T.greyLine, cx = R.x0 + R.size / 2, y = R.y0;
-        this.text(`${ok ? "✓" : "✕"}  ${label}`, [cx, y], { size: 13.5, color: col, alpha: aEnd, weight: 550, base: "top", dy: 10 });
+        this.verdict(ok, label, [cx, y], col, aEnd);
       }
+    }
+    // "✓ Correct action" / "✕ Wrong action" under the robot: the mark is drawn (straight strokes), sized to the
+    // capitals of the label and centred on them; mark and label together are centred under the robot
+    verdict(ok, label, p, color, alpha) {
+      const x = this.ctx, b = this.b; x.save(); x.globalAlpha = alpha;
+      x.font = `550 ${13.5 * b}px ${this.T.sans}`; x.textBaseline = "top"; x.textAlign = "left";
+      const m = x.measureText("H"), Y = this.py(p[1]) + 10 * b;
+      const capTop = Y - m.actualBoundingBoxAscent, base = Y + m.actualBoundingBoxDescent, cap = base - capTop, mid = (capTop + base) / 2;
+      const mw = ok ? 1.05 * cap : 0.82 * cap, gap = 5 * b, lw = x.measureText(label).width;
+      const X0 = this.px(p[0]) - (mw + gap + lw) / 2;
+      x.strokeStyle = color; x.lineWidth = 1.6 * b; x.lineCap = "round"; x.lineJoin = "round"; x.beginPath();
+      if (ok) { const h = 0.84 * cap; x.moveTo(X0, mid + 0.02 * h); x.lineTo(X0 + 0.36 * mw, mid + h / 2); x.lineTo(X0 + mw, mid - h / 2); }
+      else { const h = mw / 2; x.moveTo(X0, mid - h); x.lineTo(X0 + mw, mid + h); x.moveTo(X0 + mw, mid - h); x.lineTo(X0, mid + h); }
+      x.stroke();
+      x.fillStyle = color; x.fillText(label, X0 + mw + gap, Y);
+      x.restore();
     }
     policyTag(alpha = 1) {
       const L = this.sc.layout, lolip = this.sc.policy === "lolip";

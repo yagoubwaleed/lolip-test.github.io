@@ -287,7 +287,8 @@ window.SLIDES = {};
   // kind: "pink" = trained (noise policy), "frozen" = the pretrained flow policy (light blue, snowflake), else grey
   function box(x0, x1, y, BH, name, kind, i) {
     const [fill, edge] = kind === "pink" ? ["var(--box-pink)", "var(--box-pink-edge)"] : kind === "frozen" ? ["var(--box-blue)", "var(--box-blue-edge)"] : ["var(--box)", C.ink];
-    const label = kind === "frozen" ? `<tspan font-size=".86em">❄\uFE0F</tspan>\u2009${name}` : name;
+    // the emoji sits low in the font: lift it onto the capitals of the name, then return to the baseline
+    const label = kind === "frozen" ? `<tspan font-size=".86em" dy="-.083em">❄\uFE0F</tspan><tspan dy=".0714em">\u2009${name}</tspan>` : name;
     return `<g class="d-in" style="--i:${i}"><rect class="bx" x="${x0}" y="${y - BH / 2}" width="${x1 - x0}" height="${BH}" rx="10" style="fill:${fill};stroke:${edge}" stroke-width="1.8"/><text x="${(x0 + x1) / 2}" y="${y}">${label}</text></g>`;
   }
   // step groups for the walk-through: G(steps, html, pulse) wraps a piece of the diagram; `steps` lists the steps that

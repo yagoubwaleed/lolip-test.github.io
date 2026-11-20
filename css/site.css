@@ -254,7 +254,9 @@ h2 b { font-weight: 600; }
 @keyframes shoot-l { 0% { transform: translateX(0) } 45% { transform: translateX(-28px) } 46% { transform: translateX(28px) } 100% { transform: translateX(0) } }
 .arrow[disabled] { opacity: 0; pointer-events: none; transform: scale(.8); }
 .hint { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 15; font-family: "Geist Mono", monospace; font-size: 11px; color: var(--faint); transition: opacity .6s; }
-.hint kbd { font: inherit; border: 1px solid var(--hair); border-radius: 5px; padding: 1px 5px; color: var(--ink-2); background: var(--surface); }
+.hint kbd { display: inline-grid; place-items: center; box-sizing: border-box; width: 20px; height: 17px; vertical-align: middle; font: inherit; border: 1px solid var(--hair); border-radius: 5px; color: var(--ink-2); background: var(--surface); }
+.hint kbd .ic.go { --w: 8.1px; --h: 6px; vertical-align: 0; }
+.ic.back { transform: scaleX(-1); }
 
 /* ------------------------------------------------------------------ slide specifics */
 .title-slide h1 { letter-spacing: -.045em; font-weight: 500; }
@@ -424,11 +426,13 @@ h1, h2 { text-wrap: balance; }
 /* tabs and play buttons keep pulsing until they are clicked */
 .seg.tabs button.cue, .sbtn.cue { animation: nudge 1.8s var(--ease-out) infinite; }
 
-/* icons after a label: drawn line icons, each sized so it reads at the weight of the text */
-.ic { display: inline-block; flex: none; width: var(--s); height: var(--s); background: currentColor; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; vertical-align: -0.15em; font-style: normal; }
-.ic.out { --s: 13px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11l6-6M6.5 5H11v4.5'/%3E%3C/svg%3E"); }
-.ic.go { --s: 14px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h10M9.5 4.5L13 8l-3.5 3.5'/%3E%3C/svg%3E"); }
-.ic.rep { --s: 14px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.2 8a4.8 4.8 0 1 0 1.5-3.5'/%3E%3Cpath d='M4.4 2.6v2.4h2.4'/%3E%3C/svg%3E"); }
-.ic.play { --s: 12px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='black'%3E%3Cpath d='M5.5 4.2v7.6L12 8z'/%3E%3C/svg%3E"); }
-.ref .ic { margin-left: 1px; }
-.btn, .sbtn, .nbtn { gap: 6px; }
+/* icons after a label: line icons cropped to their drawn extent, so the gap to the text and the button padding are
+   exactly what is set here; each is sized to read at the weight of the 13px text */
+.ic { display: inline-block; flex: none; width: var(--w); height: var(--h); background: currentColor; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; vertical-align: -0.05em; font-style: normal; }
+.ic.out { --w: 8px; --h: 8px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='3.85 3.85 8.3 8.3' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 11.5l7-7M6 4.5h5.5V10'/%3E%3C/svg%3E"); }
+.ic.go { --w: 10.1px; --h: 7.5px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2.25 3.75 11.5 8.5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h10M9.5 4.5L13 8l-3.5 3.5'/%3E%3C/svg%3E"); }
+.ic.rep { --w: 10.1px; --h: 10.6px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2.45 1.85 11.1 11.7' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.2 8a4.8 4.8 0 1 0 1.5-3.5'/%3E%3Cpath d='M4.4 2.6v2.4h2.4'/%3E%3C/svg%3E"); }
+.ic.play { --w: 6.6px; --h: 7.7px; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='5.5 4.2 6.5 7.6' fill='black'%3E%3Cpath d='M5.5 4.2v7.6L12 8z'/%3E%3C/svg%3E"); }
+.ref .ic { --w: 8.5px; --h: 8.5px; margin-left: 1px; vertical-align: 0px; }   /* after a space: 5px from the text, centred on the capitals */
+.btn, .sbtn, .nbtn { gap: 4px; }
+.btn .ic.out, .nbtn .ic.out { transform: translateY(.3px); }   /* measured: otherwise 0.3px above the capitals' centre */
