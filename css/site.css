@@ -113,15 +113,15 @@ b, strong { font-weight: 600; }
   transition: transform .7s var(--ease), width .7s var(--ease);
 }
 /* right end of the nav: paper link and theme toggle, centred on the same line as the slide titles */
-.nav-r { justify-self: end; display: flex; align-items: center; gap: 2px; }
-.nbtn { display: inline-flex; align-items: baseline; padding: 7px 11px; border: 0; border-radius: 999px; background: none; font: inherit; font-size: 13px; color: var(--muted); text-decoration: none; white-space: nowrap; transition: color .35s var(--ease-out); }
-.nbtn:hover { color: var(--ink); }
-/* theme toggle: the same size and look as a slide-title button */
+.nav-r { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.nbtn { display: inline-flex; align-items: center; box-sizing: border-box; height: 31px; padding: 0 11px; border: 1px solid var(--hair); border-radius: 999px; background: var(--surface); font: inherit; font-size: 13px; color: var(--ink); text-decoration: none; white-space: nowrap; transition: border-color .3s; }
+.nbtn:hover { border-color: var(--ink); }
+/* paper link and theme toggle: bubbles the height of a slide-title button */
 .theme {
-  position: relative; flex: none; width: 31px; height: 31px; padding: 0; border: 0; border-radius: 50%; background: none;
-  color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: color .35s var(--ease-out);
+  position: relative; flex: none; box-sizing: border-box; width: 31px; height: 31px; padding: 0; border: 1px solid var(--hair); border-radius: 50%; background: var(--surface);
+  color: var(--ink); cursor: pointer; display: grid; place-items: center; transition: border-color .3s;
 }
-.theme:hover { color: var(--ink); }
+.theme:hover { border-color: var(--ink); }
 .theme svg { width: 15px; height: 15px; transition: transform .6s var(--ease); }
 .theme .moon { display: none; }
 :root[data-theme="dark"] .theme .sun { display: none; }
