@@ -168,7 +168,7 @@ b, strong { font-weight: 600; }
 .chart-host svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .scene-host { width: min(100%, 100cqh * 4.35); }                 /* the cropped scenes are 4.35 : 1 */                 /* the scenes are about 4.2 : 1 */
 .build .cap { margin-top: 10px; min-height: 4.5em; }               /* same height for every build: room for 3 lines */
-.build .scene-status { margin: 8px 0 0; text-align: center; }
+.build .scene-status, .build .dstep { margin: 8px 0 0; text-align: center; }
 .tpl-body svg text { fill: var(--ink); }
 .tpl-body svg .axis-label { fill: var(--muted); }
 .legend.static i.sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
@@ -418,10 +418,8 @@ h1, h2 { text-wrap: balance; }
 .fig-head { position: relative; }
 .prog { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; pointer-events: none; }
 .prog i { display: block; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; }
-.dcard .prog { bottom: 0; height: 2px; }
-.title-slide .fig { position: relative; }
-.title-slide .fig .prog { bottom: 0; background: var(--hair); }
 /* next cue: when the animation has finished, the next figure's tab or the next-slide arrow asks to be clicked */
-@keyframes nudge { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ink) 40%, transparent); } 100% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--ink) 0%, transparent); } }
-.arrow.next.ready { background: var(--ink); color: var(--on-ink); border-color: var(--ink); overflow: visible; animation: nudge 1.6s var(--ease-out) 3; }
-.seg.tabs button.cue { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); animation: nudge 1.6s var(--ease-out) 3; }
+@keyframes nudge { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ink) 30%, transparent); } 70%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ink) 0%, transparent); } }
+.arrow.next.ready { background: var(--ink); color: var(--on-ink); border-color: var(--ink); overflow: visible; animation: nudge 1.8s var(--ease-out) 3; }
+/* tabs and play buttons keep pulsing until they are clicked */
+.seg.tabs button.cue, .sbtn.cue { animation: nudge 1.8s var(--ease-out) infinite; }

@@ -351,7 +351,7 @@ window.SLIDES = {};
   // walk-through: dims the diagram, then lights each step's pieces in order, draws its arrows, runs a dot along them,
   // and shows the step's sentence below the diagram; at the end everything is lit again
   function walkthrough(card, steps, onReplay) {
-    const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay"), bar = prog(card);
+    const svg = card.querySelector("svg.dg"), cap = card.querySelector(".dstep"), btn = card.querySelector(".dplay");
     const STEP = 2.8;
     let timers = [], rafs = [];
     const later = (sec, fn) => timers.push(setTimeout(fn, sec * 1000));
@@ -395,17 +395,17 @@ window.SLIDES = {};
       svg.classList.remove("playing");
       svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past"));
       svg.querySelectorAll(".d-draw").forEach((el) => { el.style.transition = ""; el.style.strokeDashoffset = ""; });
-      if (!keepCaption) { cap.innerHTML = ""; cap.style.opacity = 1; bar.reset(); }
+      if (!keepCaption) { cap.innerHTML = ""; cap.style.opacity = 1; }
     }
     function play(then) {
       reset(true);
       svg.classList.add("playing");
       const total = 0.35 + steps.length * STEP;
-      bar.run(total);
       steps.forEach((_, i) => later(0.35 + i * STEP, () => light(i + 1)));
       later(total, () => { svg.classList.remove("playing"); svg.querySelectorAll("[data-s]").forEach((g) => g.classList.remove("lit", "past")); cap.style.opacity = 0; then?.(); });
     }
-    btn.addEventListener("click", () => { uncue(); play(onReplay); });
+    // the play button pulses until it is first clicked, then becomes a replay button
+    btn.addEventListener("click", () => { btn.classList.remove("cue"); btn.textContent = "Replay ↺"; uncue(); play(onReplay); });
     return { play, reset: () => reset(false) };
   }
 
@@ -530,10 +530,9 @@ window.SLIDES = {};
     play() {
       const s = document.getElementById("intro"), end = NARRATION[NARRATION.length - 1][0] + 0.6;
       cloud?.start(); uncue(); clearTimeout(this.t);
-      prog(s).run(end);
       this.t = setTimeout(() => done(s), window.SHOT ? 0 : end * 1000);
     },
-    leave() { cloud?.stop(); clearTimeout(this.t); prog(document.getElementById("intro")).reset(); },
+    leave() { cloud?.stop(); clearTimeout(this.t); },
   };
 
   let wDSRL, wDSBC;
@@ -544,7 +543,6 @@ window.SLIDES = {};
       wDSRL = walkthrough(document.getElementById("dgDSRL").closest(".dcard"), DSRL_STEPS, fin);
       wDSBC = walkthrough(document.getElementById("dgDSBC").closest(".dcard"), DSBC_STEPS, fin);
     },
-    enter() { wDSRL.play(() => wDSBC.play(() => done(document.getElementById("setting")))); },
     leave() { wDSRL.reset(); wDSBC.reset(); },
   };
 
@@ -595,7 +593,8 @@ window.SLIDES = {};
     let p = initial, cur = null, timers = [], run_id = 0;
     const later = (sec, fn) => timers.push(setTimeout(fn, (sec * 1000) / cur.sc.clock.speedup));
     const clear = () => { timers.forEach(clearTimeout); timers = []; };
-    const say = (txt) => { st.style.opacity = 0; setTimeout(() => { st.textContent = txt; st.style.opacity = 1; }, window.SHOT ? 0 : 200); };
+    // one numbered sentence per stage, as in the Setting walk-throughs
+    const say = (k, html) => { st.style.opacity = 0; setTimeout(() => { st.innerHTML = `<span class="n">${k} / 5</span>${html}`; st.style.opacity = 1; }, window.SHOT ? 0 : 200); };
     const stop = () => { run_id++; clear(); cur?.stop(); line.reset(); st.textContent = ""; };
     async function run() {
       stop(); uncue();
@@ -604,16 +603,17 @@ window.SLIDES = {};
       if (id !== run_id) return;
       cur.showTarget = false; cur.t = 0; cur.draw(0);
       const v = cur.sc.clock.speedup, t1 = cur.T0 + 1.3, mug = cur.sc.noise_points[cur.sc.selected].task === "mugplace";
+      const task = mug ? "Pick Mug" : "Pick Bowl";
       line.run(cur.end / v + SPARKLE);
-      say("Mapping 240 demonstrations back through the flow to their noises…");
+      say(1, "Invert the frozen flow: each demonstration action gives its noise.");
       cur.play(0, 2.6, v, () => {
-        say("Fitting a noise policy to the noises of the Pick Mug demonstrations…");
+        say(2, "Train the noise policy on the Pick Mug noises.");
         cur.sparkle(2.6, SPARKLE, () => cur.play(2.6, t1, v, () => {
           cur.showTarget = true;
-          say("Target: pick the mug. Sampling a noise from the noise policy…");
-          later(2.6 - 1.3 + 0.3, () => say(`The sampled noise is a ${mug ? "Pick Mug" : "Pick Bowl"} noise. Rolling out…`));
+          say(3, "Target: pick the mug. The noise policy samples a noise <i>w′</i>.");
+          later(2.6 - 1.3 + 0.3, () => say(4, `The sampled noise <i>w′</i> lies among the ${task} noises, so the flow gives a ${task} action <i>a</i>.`));
           cur.play(t1, cur.end, v, () => {
-            say(mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.");
+            say(5, mug ? "The robot reaches for the mug." : "The robot reaches for the bowl, not the mug.");
             done(fig);
           });
         }));

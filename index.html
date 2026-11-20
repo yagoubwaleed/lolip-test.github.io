@@ -80,7 +80,7 @@
 loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <span class="c"># add to CFM loss</span></code></pre>
       </figure>
     </div>
-    <div class="fig" data-a style="--d:2"><div class="cloud"><canvas id="cloudCanvas" data-r="0.47"></canvas><div class="narr" id="narr"><p></p></div></div><div class="prog"><i></i></div></div>
+    <div class="fig" data-a style="--d:2"><div class="cloud"><canvas id="cloudCanvas" data-r="0.47"></canvas><div class="narr" id="narr"><p></p></div></div></div>
   </section>
 
   <!-- 02 -->
@@ -89,20 +89,18 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <h2 class="one-line" data-a style="--d:1;text-align:center">We want to finetune flow policies <b>without touching the weights</b>.</h2>
       <div class="diagrams">
         <div class="dcard" data-a style="--d:2">
-          <button class="sbtn dplay" aria-label="Replay the walk-through">Replay ↺</button>
+          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play ▸</button>
           <h3>DSRL <span>· noise steering via RL</span></h3>
           <a class="ref" href="https://arxiv.org/abs/2506.15799" target="_blank" rel="noopener">Wagenmaker et al., 2025 ↗</a>
           <div id="dgDSRL"></div>
           <p class="dstep" aria-live="polite"></p>
-          <div class="prog"><i></i></div>
         </div>
         <div class="dcard" data-a style="--d:3">
-          <button class="sbtn dplay" aria-label="Replay the walk-through">Replay ↺</button>
+          <button class="sbtn dplay cue" aria-label="Play the walk-through">Play ▸</button>
           <h3>DSBC <span>· noise steering via inverted demos</span></h3>
           <a class="ref" href="https://arxiv.org/abs/2606.13675" target="_blank" rel="noopener">Tang et al., 2026 ↗</a>
           <div id="dgDSBC"></div>
           <p class="dstep" aria-live="polite"></p>
-          <div class="prog"><i></i></div>
         </div>
         <p class="problem" data-a style="--d:5"><b>Problem:</b> both work <span class="pk">inefficiently</span>.</p>
       </div>
@@ -143,7 +141,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <div class="build" data-anim data-label="Noise policy">
         <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button></span></div>
         <div class="fig-main"><div id="sceneInfV" class="scene-host"></div></div>
-        <p class="scene-status" data-status></p>
+        <p class="dstep" data-status aria-live="polite"></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
       <div class="build" data-label="Singular values" hidden>
@@ -206,7 +204,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <div class="build" data-anim data-label="Noise policy">
         <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay ↺</button><div class="seg pink" data-policy><span class="knob"></span><button aria-pressed="false" data-v="vanilla">Vanilla CFM</button><button aria-pressed="true" data-v="lolip" class="is-lolip">LoLip</button></div></span></div>
         <div class="fig-main"><div id="sceneInfL" class="scene-host"></div></div>
-        <p class="scene-status" data-status></p>
+        <p class="dstep" data-status aria-live="polite"></p>
         <div class="cap">Isaac Lab, LoLip and Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
     </div>
