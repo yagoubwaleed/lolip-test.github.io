@@ -327,7 +327,8 @@ button.btn { font: inherit; font-size: 14px; cursor: pointer; }
 .dg .pulse { pointer-events: none; }
 .dcard h3 { margin: 0 0 2px; font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
 .dcard h3 span { font-weight: 400; color: var(--ink-2); }
-.dcard .ref { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.dcard .ref { display: table; font-size: 12px; color: var(--muted); margin-bottom: 10px; text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; transition: color .2s, text-decoration-color .2s; }
+.dcard .ref:hover { color: var(--ink); text-decoration-color: var(--ink); }
 .dg text { font-size: 25px; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
 .dg .d-in { opacity: 0; transition: opacity .6s var(--ease-out); }
 .dg .d-draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .7s var(--ease-out); }
