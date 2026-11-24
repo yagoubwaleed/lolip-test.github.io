@@ -208,6 +208,23 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </div>
   </section>
 
+  <!-- tradeoff -->
+  <section class="slide tpl" style="--ar:1.16" id="cost" data-title="Tradeoff">
+    <header class="tpl-head">
+      <h2 data-a style="--d:1">Tradeoff: wider action spread lowers base success; <b>DSBC recovers it</b>.</h2>
+        <p class="lede" data-a style="--d:2">LoLip keeps each denoising step from contracting, so noises sampled from N(0, I) map to a wider range of actions. The base policy samples its noise from N(0, I) without steering, so some of these actions fall outside the demonstrated motions and more rollouts fail. A noise policy samples only where the demonstrations' noises lie, which removes most of this loss.</p>
+        <p class="lede" data-a style="--d:3">LIBERO-90, 20 tasks, base policies trained with the task instruction. Success rate of the base policy alone: Vanilla CFM 86%, LoLip 70%. With a DSBC noise policy trained on the same demonstrations: 89% and 85%.</p>
+    </header>
+    <div class="tpl-body" data-a style="--d:4">
+      <div class="build" data-label="Mean success rate, 20 tasks">
+        <div class="fig-head"><span class="fig-title">Mean success rate, 20 tasks</span><span class="fig-ctl"><span class="legend static"><span><i class="sw v"></i>Vanilla CFM</span><span><i class="sw l"></i>LoLip (Ours)</span></span></span></div>
+        <div class="fig-main"><div id="barsCost" class="chart-host"></div></div>
+        <p class="scene-status" aria-hidden="true"></p>
+        <div class="cap">LIBERO-90, 20 tasks · mean over 3 training seeds, 25 episodes per task · error bars: 1 sd over seeds</div>
+      </div>
+    </div>
+  </section>
+
   <!-- 08 -->
   <section class="slide tpl" style="--ar:1.62" id="dsbc" data-title="DSBC">
     <header class="tpl-head">
@@ -275,21 +292,6 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
     </div>
   </section>
 
-  <!-- 12 -->
-  <section class="slide tpl" style="--ar:1.16" id="cost" data-title="Cost">
-    <header class="tpl-head">
-      <h2 data-a style="--d:1">Limitation: LoLip lowers base success; <b>DSBC recovers it</b>.</h2>
-        <p class="lede" data-a style="--d:2">LIBERO-90, 20 tasks, base policies trained with the task instruction. Success rate of the base policy alone: Vanilla CFM 86%, LoLip 70%. With a DSBC noise policy trained on the same demonstrations: 89% and 85%.</p>
-    </header>
-    <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Mean success rate, 20 tasks">
-        <div class="fig-head"><span class="fig-title">Mean success rate, 20 tasks</span><span class="fig-ctl"><span class="legend static"><span><i class="sw v"></i>Vanilla CFM</span><span><i class="sw l"></i>LoLip (Ours)</span></span></span></div>
-        <div class="fig-main"><div id="barsCost" class="chart-host"></div></div>
-        <p class="scene-status" aria-hidden="true"></p>
-        <div class="cap">LIBERO-90, 20 tasks · mean over 3 training seeds, 25 episodes per task · error bars: 1 sd over seeds</div>
-      </div>
-    </div>
-  </section>
 
 </div></main>
 
