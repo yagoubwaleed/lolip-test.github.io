@@ -209,14 +209,20 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
   </section>
 
   <!-- tradeoff -->
-  <section class="slide tpl" style="--ar:1.16" id="cost" data-title="Tradeoff">
+  <section class="slide tpl" style="--ar:2.1" id="cost" data-title="Tradeoff">
     <header class="tpl-head">
       <h2 data-a style="--d:1">Tradeoff: wider action spread lowers base success; <b>DSBC recovers it</b>.</h2>
         <p class="lede" data-a style="--d:2">LoLip keeps each denoising step from contracting, so noises sampled from N(0, I) map to a wider range of actions. The base policy samples its noise from N(0, I) without steering, so some of these actions fall outside the demonstrated motions and more rollouts fail. A noise policy samples only where the demonstrations' noises lie, which removes most of this loss.</p>
         <p class="lede" data-a style="--d:3">LIBERO-90, 20 tasks, base policies trained with the task instruction. Success rate of the base policy alone: Vanilla CFM 86%, LoLip 70%. With a DSBC noise policy trained on the same demonstrations: 89% and 85%.</p>
     </header>
     <div class="tpl-body" data-a style="--d:4">
-      <div class="build" data-label="Mean success rate, 20 tasks">
+      <div class="build" data-anim data-label="Random noises">
+        <div class="fig-head"><span class="fig-title">Random noises</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button></span></div>
+        <div class="fig-main"><div class="vs-pair"><div class="vs-item"><div class="rw-label">Vanilla CFM</div><div class="vs-vid"><video id="vSpreadV" muted playsinline preload="auto" poster="media/spread_random_vanilla.jpg" src="media/spread_random_vanilla.mp4"></video></div></div><div class="vs-item"><div class="rw-label is-lolip">LoLip (Ours)</div><div class="vs-vid"><video id="vSpreadL" muted playsinline preload="auto" poster="media/spread_random_lolip.jpg" src="media/spread_random_lolip.mp4"></video></div></div></div></div>
+        <p class="scene-status" aria-hidden="true"></p>
+        <div class="cap">Isaac Lab, base policies alone (training seed 0), held-out scene 24 · the same 12 noises for both policies, drawn at random · 12 rollouts, one fixed noise each, overlaid; lines: fingertip paths over 1 s of robot time, shown at 0.2× speed · in this scene, 338 of 384 noises complete the mug task with Vanilla CFM, 8 of 384 with LoLip</div>
+      </div>
+      <div class="build" data-label="Mean success rate, 20 tasks" hidden>
         <div class="fig-head"><span class="fig-title">Mean success rate, 20 tasks</span><span class="fig-ctl"><span class="legend static"><span><i class="sw v"></i>Vanilla CFM</span><span><i class="sw l"></i>LoLip (Ours)</span></span></span></div>
         <div class="fig-main"><div id="barsCost" class="chart-host"></div></div>
         <p class="scene-status" aria-hidden="true"></p>

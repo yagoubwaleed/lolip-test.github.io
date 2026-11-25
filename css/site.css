@@ -186,6 +186,12 @@ b, strong { font-weight: 600; }
 .rw-pair .rw-vid { width: 100%; aspect-ratio: 4 / 3; }
 .rw-pair .rw-vid { border-radius: 0; overflow: hidden; background: var(--soft); margin: 0; }
 .rw-pair .rw-vid video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* tradeoff: two square overlay videos side by side, labels above */
+.vs-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: min(100%, calc((100cqh - 26px) * 2 + 24px)); }
+.vs-item { min-width: 0; }
+.rw-label.is-lolip { color: var(--pink); }
+.vs-vid { width: 100%; aspect-ratio: 1; overflow: hidden; background: var(--soft); }
+.vs-vid video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rw-chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
 /* staggered entrance */

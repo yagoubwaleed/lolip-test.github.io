@@ -788,6 +788,16 @@ window.SLIDES = {};
       bC = barChart(document.getElementById("barsCost"), { groups: d.groups, W: 440, yMax: 1.06, yTicks: [0, .25, .5, .75, 1], labels: true });
     },
     async enter() { await load("libero90"); },
-    build() { bC.play(); },
+    build(k) { if (k === 0) vSpread.run(); else { vSpread.stop(); bC.play(); } },
+    leave() { vSpread.stop(); },
   };
+  // tradeoff: Vanilla and LoLip overlays start together; the build ends when they do
+  const vSpread = (() => {
+    const fig = document.getElementById("vSpreadL").closest(".build"), line = prog(fig);
+    const ids = ["vSpreadV", "vSpreadL"];
+    const run = () => { uncue(); playVid(...ids); line.run(document.getElementById("vSpreadL").duration || 5.1); };
+    document.getElementById("vSpreadL").addEventListener("ended", () => done(fig));
+    fig.querySelector("[data-replay]").addEventListener("click", run);
+    return { run, stop: () => { stopVid(...ids); line.reset(); } };
+  })();
 })();
