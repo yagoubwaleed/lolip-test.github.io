@@ -141,6 +141,7 @@ loss = cfm_loss + 50 * <span class="f">lolip_penalty</span>(v, x_t, t, obs)  <sp
       <div class="build" data-anim data-label="Noise policy">
         <div class="fig-head"><span class="fig-title">Noise policy</span><span class="fig-ctl"><button class="sbtn" data-replay>Replay <i class="ic rep"></i></button></span></div>
         <div class="fig-main"><div id="sceneInfV" class="scene-host"></div></div>
+        <p class="scene-status" aria-hidden="true"></p>
         <div class="cap">Isaac Lab, Vanilla CFM (training seed 0) · dots: each training demonstration's first action chunk, and the noise it maps back to through the flow · arrows join the two (curve shape drawn) · circle sizes and zoom are illustration · robot: Isaac recording of the base policy with its DSBC noise policy, held-out scene 2</div>
       </div>
       <div class="build" data-label="Singular values" hidden>
